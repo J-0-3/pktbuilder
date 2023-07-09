@@ -43,6 +43,7 @@ namespace pktbuilder {
         this->source_address = other.getSourceAddress();
         this->destination_address = other.getDestinationAddress();
         IPv4Packet new_packet = other;
+        new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4ProtocolNumber::TCP);
         new_packet.setPayload(this->build());
         return new_packet;
     }

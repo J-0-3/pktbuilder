@@ -1,34 +1,31 @@
 #include <pktbuilder/Ethernet.h>
+#include <pktbuilder/utils.h>
 #include <bit>
 #include <cstring>
 
 namespace pktbuilder {
-    EthernetFrame::EthernetFrame() {
-        this->destination_mac_ = mac_addr_t({ 0, 0, 0, 0, 0, 0 });
-        this->source_mac_ = mac_addr_t({ 0, 0, 0, 0, 0, 0 });
-        this->ethertype_ = EtherType::IPv4;
-    }
-    EthernetFrame::EthernetFrame(mac_addr_t const& destination_mac, mac_addr_t const& source_mac,
-                                 EtherType ethertype) {
-        this->destination_mac_ = destination_mac;
-        this->source_mac_ = source_mac;
-        this->ethertype_ = ethertype;
+    EthernetFrame::EthernetFrame(mac_addr_t const& destination_mac, uint16_t ethertype, mac_addr_t const& source_mac) {
+        this->destination_mac = destination_mac;
+        if (source_mac == mac_addr_t({0, 0, 0, 0})) {
+            std::string default_nic = getDefaultInterfaceName();
+            if (!default_nic.empty()) {
+                this->source_mac = getInterfaceMAC(default_nic);
+            } else {
+                this->source_mac = source_mac;
+            }
+        } else {
+            this->source_mac = source_mac;
+        }
+        this->ethertype = ethertype;
     }
     std::vector<uint8_t> EthernetFrame::build() const {
         std::vector<uint8_t> data;
         data.reserve(14 + this->payload.size());
-        data.insert(data.end(), this->destination_mac_.begin(),
-                    this->destination_mac_.end());
-        data.insert(data.end(), this->source_mac_.begin(),
-                    this->source_mac_.end());
-        uint8_t ethertype_bytes[2];
-        std::memcpy(ethertype_bytes, &this->ethertype_, 2);
-        if (std::endian::native == std::endian::little) {
-            std::reverse(
-                    std::begin(ethertype_bytes),
-                    std::end(ethertype_bytes)
-            );
-        }
+        data.insert(data.end(), this->destination_mac.begin(),
+                    this->destination_mac.end());
+        data.insert(data.end(), this->source_mac.begin(),
+                    this->source_mac.end());
+        std::array<uint8_t, 2> ethertype_bytes = splitBytesBigEndian(this->ethertype);
         data.push_back(ethertype_bytes[0]);
         data.push_back(ethertype_bytes[1]);
         data.insert(data.end(), this->payload.begin(),
@@ -36,12 +33,12 @@ namespace pktbuilder {
         return data;
     }
     const mac_addr_t& EthernetFrame::getDestinationMac() const {
-        return this->destination_mac_;
+        return this->destination_mac;
     }
     const mac_addr_t& EthernetFrame::getSourceMac() const {
-        return this->source_mac_;
+        return this->source_mac;
     }
-    const EtherType& EthernetFrame::getEthertype() const {
-        return this->ethertype_;
+    const uint16_t& EthernetFrame::getEthertype() const {
+        return this->ethertype;
     }
 }

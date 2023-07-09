@@ -5,12 +5,21 @@
 #include <stdexcept>
 #include <cstring>
 #include <bit>
+#include "pktbuilder/utils.h"
 
 namespace pktbuilder {
-    IPv4Packet::IPv4Packet(ipv4_addr_t source_ip,
-                           ipv4_addr_t destination_ip,
-                           IPv4ProtocolNumber protocol) {
-        this->source_ip = source_ip;
+    IPv4Packet::IPv4Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
+                           uint8_t protocol) {
+        if (source_ip == ipv4_addr_t({0, 0, 0, 0})) {
+            std::string default_nic = getDefaultInterfaceName();
+            if (!default_nic.empty()) {
+                this->source_ip = getInterfaceIPv4Address(default_nic);
+            } else {
+                this->source_ip = source_ip;
+            }
+        } else {
+            this->source_ip = source_ip;
+        }
         this->destination_ip = destination_ip;
         this->protocol = protocol;
         this->dscp = 0;
@@ -24,9 +33,8 @@ namespace pktbuilder {
         this->options = std::vector<IPv4Option>();
         this->fragment_offset = 0;
     }
-    IPv4Packet::IPv4Packet(ipv4_addr_t source_ip,
-                           ipv4_addr_t destination_ip,
-                           IPv4ProtocolNumber protocol, uint16_t identification,
+    IPv4Packet::IPv4Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
+                           uint8_t protocol, uint16_t identification,
                            uint8_t dscp, ECNCodePoint ecn,
                            bool df_flag, bool mf_flag, uint16_t fragment_offset,
                            uint8_t ttl,
@@ -48,7 +56,7 @@ namespace pktbuilder {
         data.reserve(20);
         uint8_t ihl_bytes = 20;
         uint8_t option_padding = 0;
-        for (auto option: options) {
+        for (const auto& option: options) {
             ihl_bytes += 2 + option.option_value.size();
         }
         if (ihl_bytes % 4 != 0) {
@@ -96,7 +104,7 @@ namespace pktbuilder {
         data.push_back(flags_frag_offset_bytes[0]);
         data.push_back(flags_frag_offset_bytes[1]);
         data.push_back(this->ttl);
-        data.push_back(static_cast<uint8_t>(this->protocol));
+        data.push_back(this->protocol);
         data.push_back(0);
         data.push_back(0);
         for(uint8_t octet: this->source_ip) {
@@ -129,12 +137,26 @@ namespace pktbuilder {
         return data;
     }
 
+    EthernetFrame IPv4Packet::operator| (const EthernetFrame& other) const {
+        uint16_t ethertype = other.getEthertype() ?: EtherType::IPv4;
+        EthernetFrame new_frame(other.getDestinationMac(), ethertype, other.getSourceMac());
+        new_frame.setPayload(this->build());
+        return new_frame;
+    }
     ipv4_addr_t const &IPv4Packet::getSourceAddress() const {
         return this->source_ip;
     }
 
     ipv4_addr_t const &IPv4Packet::getDestinationAddress() const {
         return this->destination_ip;
+    }
+
+    uint8_t const &IPv4Packet::getProtocolNumber() const {
+        return this->protocol;
+    }
+
+    void IPv4Packet::setProtocolNumber(uint8_t p) {
+        this->protocol = p;
     }
 
 }
