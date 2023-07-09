@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.22)
+project(pktbuilder)
+set(CMAKE_CXX_STANDARD 20)
+include_directories(include)
+add_library(pktbuilder src/Ethernet.cpp src/addresses.cpp src/Layer.cpp src/IPv4.cpp src/ICMP.cpp src/checksum.cpp src/TCP.cpp src/UDP.cpp)
+add_executable(testipv4 tests/ipv4.cpp)
+target_link_libraries(testipv4 pktbuilder pcap)
