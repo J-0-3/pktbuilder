@@ -89,7 +89,7 @@ This allows protocol stacks to be represented visually with the higher level
 protocols at the top and the lower level protocols at the bottom like so:
 
 ```c++
-auto packet = std::string("some data") |
+auto packet = std::string("hello world") |
               pktbuilder::UDPDatagram(8080) |
               pktbuilder::IPv4Packet({192, 168, 1, 1}) |
               pktbuilder::EthernetFrame({0x01, 0x23, 0x45, 0x67, 0x89, 0xab});
