@@ -80,7 +80,7 @@ program.
 If the library is not placed in your default system library path, you must add 
 the directory containing it to your compiler's library path. If you are using
 g++, add `-L<PATH TO FOLDER CONTAINING LIBRARY>` to your compiler command (e.g. 
-if the headers were stored in your project directory under `lib/pktbuilder`
+if library was stored in your project directory under `lib/pktbuilder`
 then you would add `-L./lib/pktbuilder` to your g++ command). If your project
 is using CMake then add a line to your `CMakeLists.txt` which adds the directory
 to your linker path (`link_directories(<PATH TO FOLDER> <OTHER LIBRARY PATHS>...)`).
@@ -104,7 +104,13 @@ your compile command), If your project is using CMake then add a line to your
 `CMakeLists.txt` which adds the directory to your include path (
 `include_directories(<PATH TO HEADERS> <OTHER INCLUDE DIRECTORIES...>)`).
 
+In order to build a project using PKTBuilder you **must** enable C++20 support. To do this with g++, add `-std=c++20` to your compile command. If you are using CMake this can be done by adding the following line to your `CMakeLists.txt`: 
+```
+set(CMAKE_CXX_STANDARD 20)
+```
+
 In order to use pktbuilder in your project, simply `#include <pktbuilder.h>`.
+
 ## Getting Started
 
 PKTBuilder uses a simple syntax to represent network packets, in which layers of 
