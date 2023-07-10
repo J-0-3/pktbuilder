@@ -4,7 +4,7 @@
 PKTBuilder makes it easy to construct network packets at any layer of the 
 network stack using a simple, clean syntax. 
 
-It can construct packets from an every increasing number of network protocols, 
+It can construct packets from an ever increasing number of network protocols, 
 from the application layer to the link layer. 
 
 It uses sane default values, and lower level protocols are able to infer 
