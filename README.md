@@ -15,6 +15,32 @@ when a Layer 4 protocol is added on top.
 PKTBuilder currently only supports Linux, but Windows support will be added 
 very soon.
 
+## Currently Implemented Protocols
+
+PKTBuilder currently has implementations of:
+- Ethernet
+- IPv4
+- TCP
+- UDP
+- ICMP
+- ARP
+
+## Roadmap
+
+Protcols which will be implemented in the future include:
+- DNS
+- DHCP
+- HTTP
+- FTP
+- IPv6
+- AX.25
+
+Further features I aim to add include:
+- Windows support
+- Packet decoding
+- Sending packets at various layers
+- Utility functions for certain protocols (such as performing the TCP 3-way handshake)
+
 ## Installation
 
 While precompiled static binaries are available, it is recommended that you 
