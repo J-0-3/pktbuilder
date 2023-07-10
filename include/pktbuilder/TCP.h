@@ -44,10 +44,10 @@ namespace pktbuilder {
                   uint32_t sequence_number, uint8_t flags,
                   uint16_t window_size, std::vector<TCPOption> const& options,
                   uint32_t ack_number = 0, uint16_t urgent_pointer = 0);
-        TCPPacket(ipv4_addr_t source_address, uint16_t source_port,
-                  ipv4_addr_t destination_address, uint16_t destination_port,
-                  uint32_t sequence_number, uint8_t flags,
+        TCPPacket(uint16_t destination_port, ipv4_addr_t destination_address,
+                  uint16_t source_port, uint32_t sequence_number, uint8_t flags,
                   uint16_t window_size, std::vector<TCPOption> const& options,
+                  ipv4_addr_t source_address = { 0, 0, 0, 0 },
                   uint32_t ack_number = 0, uint16_t urgent_pointer = 0);
         IPv4Packet operator|(const IPv4Packet& other);
         [[nodiscard]] std::vector<uint8_t> build() const override;

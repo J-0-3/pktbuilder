@@ -22,12 +22,23 @@ namespace pktbuilder {
         this->destination_address = { 0, 0, 0, 0 };
     }
 
-    TCPPacket::TCPPacket(ipv4_addr_t source_address, uint16_t source_port,
-                         ipv4_addr_t destination_address, uint16_t destination_port,
+    TCPPacket::TCPPacket(uint16_t destination_port,
+                         ipv4_addr_t destination_address, uint16_t source_port,
                          uint32_t sequence_number, uint8_t flags,
-                         uint16_t window_size, std::vector<TCPOption> const& options,
-                        uint32_t ack_number, uint16_t urgent_pointer) {
-        this->source_address = source_address;
+                         uint16_t window_size,
+                         const std::vector<TCPOption> &options,
+                         ipv4_addr_t source_address, uint32_t ack_number,
+                         uint16_t urgent_pointer) {
+        if (source_address == ipv4_addr_t({0, 0, 0, 0})) {
+            std::string if_name = getDefaultInterfaceName();
+            if (!if_name.empty()) {
+                this->source_address = getInterfaceIPv4Address(if_name);
+            } else {
+                this->source_address = source_address;
+            }
+        } else {
+            this->source_address = source_address;
+        }
         this->source_port = source_port;
         this->destination_address = destination_address;
         this->destination_port = destination_port;
@@ -110,5 +121,6 @@ namespace pktbuilder {
         data.at(17) = checksum_bytes[1];
         return data;
     }
+
 
 }
