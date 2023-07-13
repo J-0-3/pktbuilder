@@ -8,7 +8,7 @@
 namespace pktbuilder {
     namespace ARP {
         template <uint8_t hlen, uint8_t plen>
-        class ArpPacket: public Layer {
+        class Packet: public Layer {
         protected:
             std::array<uint8_t, hlen> sender_hardware_address;
             std::array<uint8_t, hlen> target_hardware_address;
@@ -18,7 +18,7 @@ namespace pktbuilder {
             uint16_t protocol_type;
             uint16_t opcode;
         public:
-            ArpPacket() {
+            Packet() {
                 this->sender_hardware_address = std::array<uint8_t, hlen>();
                 this->sender_hardware_address.fill(0);
                 this->sender_protocol_address = std::array<uint8_t, plen>();
@@ -31,7 +31,7 @@ namespace pktbuilder {
                 this->protocol_type = 0;
                 this->opcode = 0;
             }
-            ArpPacket(std::array<uint8_t, hlen> sender_hardware_address,
+            Packet(std::array<uint8_t, hlen> sender_hardware_address,
                     std::array<uint8_t, plen> sender_protocol_address,
                     std::array<uint8_t, hlen> target_hardware_address,
                     std::array<uint8_t, plen> target_protocol_address,
@@ -116,132 +116,132 @@ namespace pktbuilder {
             }
         };
         template<uint8_t hlen, uint8_t plen>
-        class ArpRequest: public ArpPacket<hlen, plen> {
+        class Request: public Packet<hlen, plen> {
         public:
-            ArpRequest() : ArpPacket<hlen, plen>(){
+            Request() : Packet<hlen, plen>(){
                 this->opcode = 1;
             }
-            ArpRequest(std::array<uint8_t, hlen> sender_hardware_address,
+            Request(std::array<uint8_t, hlen> sender_hardware_address,
                     std::array<uint8_t, plen> sender_protocol_address,
                     std::array<uint8_t, hlen> target_hardware_address,
                     std::array<uint8_t, plen> target_protocol_address,
                     uint16_t hardware_type, uint16_t protocol_type)
-                    :ArpPacket<hlen, plen>(sender_hardware_address,
+                    :Packet<hlen, plen>(sender_hardware_address,
                                             sender_protocol_address,
                                             target_hardware_address,
                                             target_protocol_address,
                                             hardware_type, protocol_type, 1) {};
         };
         template<uint8_t hlen, uint8_t plen>
-        class ArpReply: public ArpPacket<hlen, plen> {
+        class Reply: public Packet<hlen, plen> {
         public:
-            ArpReply() : ArpPacket<hlen, plen>(){
+            Reply() : Packet<hlen, plen>(){
                 this->opcode = 2;
             }
-            ArpReply(std::array<uint8_t, hlen> sender_hardware_address,
+            Reply(std::array<uint8_t, hlen> sender_hardware_address,
                     std::array<uint8_t, plen> sender_protocol_address,
                     std::array<uint8_t, hlen> target_hardware_address,
                     std::array<uint8_t, plen> target_protocol_address,
                     uint16_t hardware_type, uint16_t protocol_type)
-                    :ArpPacket<hlen, plen>(sender_hardware_address,
+                    :Packet<hlen, plen>(sender_hardware_address,
                                             sender_protocol_address,
                                             target_hardware_address,
                                             target_protocol_address,
                                             hardware_type, protocol_type, 1) {};
         };
         template<uint8_t plen>
-        class EthernetArpRequest: public ArpRequest<6, plen> {
+        class EthernetRequest: public Request<6, plen> {
         public:
-            EthernetArpRequest(): ArpRequest<6, plen>() {
+            EthernetRequest(): Request<6, plen>() {
                 this->hardware_type = 1;
             }
-            EthernetArpRequest(std::array<uint8_t, 6> sender_mac_address,
+            EthernetRequest(std::array<uint8_t, 6> sender_mac_address,
                             std::array<uint8_t, plen> sender_protocol_address,
                             std::array<uint8_t, 6> target_mac_address,
                             std::array<uint8_t, plen> target_protocol_address,
                             uint16_t protocol_type)
-                            :ArpRequest<6, plen>(sender_mac_address,
+                            :Request<6, plen>(sender_mac_address,
                                                     sender_protocol_address,
                                                     target_mac_address,
                                                     target_protocol_address,
                                                     1, protocol_type) {};
         };
         template<uint8_t plen>
-        class EthernetArpReply: public ArpReply<6, plen> {
+        class EthernetReply: public Reply<6, plen> {
         public:
-            EthernetArpReply(): ArpReply<6, plen>() {
+            EthernetReply(): Reply<6, plen>() {
                 this->hardware_type = 1;
             }
-            EthernetArpReply(mac_addr_t sender_mac_address,
+            EthernetReply(mac_addr_t sender_mac_address,
                             std::array<uint8_t, plen> sender_protocol_address,
                             mac_addr_t target_mac_address,
                             std::array<uint8_t, plen> target_protocol_address,
                             uint16_t protocol_type)
-                            :ArpReply<6, plen>(sender_mac_address,
+                            :Reply<6, plen>(sender_mac_address,
                                                 sender_protocol_address,
                                                 target_mac_address,
                                                 target_protocol_address,
                                                 1, protocol_type) {};
         };
         template<uint8_t hlen>
-        class IPv4ArpRequest: public ArpRequest<hlen, 4> {
+        class IPv4Request: public Request<hlen, 4> {
         public:
-            IPv4ArpRequest(): ArpRequest<hlen, 4>() {
+            IPv4Request(): Request<hlen, 4>() {
                 this->protocol_type = 0x0800;
             }
-            IPv4ArpRequest(std::array<uint8_t, hlen> sender_hardware_address,
+            IPv4Request(std::array<uint8_t, hlen> sender_hardware_address,
                         ipv4_addr_t sender_ipv4_address,
                         std::array<uint8_t, hlen> target_hardware_address,
                         ipv4_addr_t target_ipv4_address,
                         uint16_t hardware_type)
-                        :ArpRequest<hlen, 4>(sender_hardware_address,
+                        :Request<hlen, 4>(sender_hardware_address,
                                                 sender_ipv4_address,
                                                 target_hardware_address,
                                                 target_ipv4_address,
                                                 hardware_type, 0x0800) {};
         };
         template<uint8_t hlen>
-        class IPv4ArpReply: public ArpReply<hlen, 4> {
+        class IPv4Reply: public Reply<hlen, 4> {
         public:
-            IPv4ArpReply(): ArpReply<hlen, 4>() {
+            IPv4Reply(): Reply<hlen, 4>() {
                 this->protocol_type = 0x0800;
             }
-            IPv4ArpReply(std::array<uint8_t, hlen> sender_hardware_address,
+            IPv4Reply(std::array<uint8_t, hlen> sender_hardware_address,
                         ipv4_addr_t sender_ipv4_address,
                         std::array<uint8_t, hlen> target_hardware_address,
                         ipv4_addr_t target_ipv4_address,
                         uint16_t hardware_type)
-                        :ArpReply<hlen, 4>(sender_hardware_address,
+                        :Reply<hlen, 4>(sender_hardware_address,
                                             sender_ipv4_address,
                                             target_hardware_address,
                                             target_ipv4_address,
                                             hardware_type, 0x0800) {};
         };
-        class IPv4EthernetArpRequest: public EthernetArpRequest<4> {
+        class IPv4EthernetRequest: public EthernetRequest<4> {
         public:
-            IPv4EthernetArpRequest(): EthernetArpRequest<4>() {
+            IPv4EthernetRequest(): EthernetRequest<4>() {
                 this->protocol_type = 0x0800;
             }
-            IPv4EthernetArpRequest(ipv4_addr_t sender_ipv4_address,
+            IPv4EthernetRequest(ipv4_addr_t sender_ipv4_address,
                                 mac_addr_t sender_mac_address,
                                 ipv4_addr_t target_ipv4_address,
                                 mac_addr_t target_mac_address = {0, 0, 0, 0, 0, 0})
-                                :EthernetArpRequest<4>(sender_mac_address,
+                                :EthernetRequest<4>(sender_mac_address,
                                                         sender_ipv4_address,
                                                         target_mac_address,
                                                         target_ipv4_address,
                                                         0x0800) {};
         };
-        class IPv4EthernetArpReply: public EthernetArpReply<4> {
+        class IPv4EthernetReply: public EthernetReply<4> {
         public:
-            IPv4EthernetArpReply(): EthernetArpReply<4>() {
+            IPv4EthernetReply(): EthernetReply<4>() {
                 this->protocol_type = 0x0800;
             }
-            IPv4EthernetArpReply(ipv4_addr_t sender_ipv4_address,
+            IPv4EthernetReply(ipv4_addr_t sender_ipv4_address,
                                 mac_addr_t sender_mac_address,
                                 ipv4_addr_t target_ipv4_address,
                                 mac_addr_t target_mac_address)
-                                :EthernetArpReply<4>(sender_mac_address,
+                                :EthernetReply<4>(sender_mac_address,
                                                     sender_ipv4_address,
                                                     target_mac_address,
                                                     target_ipv4_address,
