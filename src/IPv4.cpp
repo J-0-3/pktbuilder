@@ -137,9 +137,9 @@ namespace pktbuilder {
         return data;
     }
 
-    EthernetFrame IPv4Packet::operator| (const EthernetFrame& other) const {
-        uint16_t ethertype = other.getEthertype() ?: EtherType::IPv4;
-        EthernetFrame new_frame(other.getDestinationMac(), ethertype, other.getSourceMac());
+    Ethernet::Frame IPv4Packet::operator| (const Ethernet::Frame& other) const {
+        uint16_t ethertype = other.getEthertype() ?: Ethernet::EtherType::IPv4;
+        Ethernet::Frame new_frame(other.getDestinationMac(), ethertype, other.getSourceMac());
         new_frame.setPayload(this->build());
         return new_frame;
     }

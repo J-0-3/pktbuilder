@@ -193,7 +193,7 @@ namespace pktbuilder {
                    std::vector<IPv4Option> const* options);
         
         [[nodiscard]] std::vector<uint8_t> build() const override;
-        EthernetFrame operator| (const EthernetFrame& other) const;
+        Ethernet::Frame operator| (const Ethernet::Frame& other) const;
         [[nodiscard]] ipv4_addr_t const& getSourceAddress() const;
         [[nodiscard]] ipv4_addr_t const& getDestinationAddress() const;
         [[nodiscard]] uint8_t const& getProtocolNumber() const;
