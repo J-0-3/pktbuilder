@@ -24,11 +24,11 @@ PKTBuilder currently has implementations of:
 - UDP
 - ICMP
 - ARP
+- DNS
 
 ## Roadmap
 
 Protcols which will be implemented in the future include:
-- DNS
 - DHCP
 - HTTP
 - FTP

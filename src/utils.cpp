@@ -36,7 +36,7 @@ namespace pktbuilder {
         std::ifstream fstream("/sys/class/net/" + interface + "/address");
         std::string mac{};
         std::getline(fstream, mac);
-        return str_to_mac_addr(mac);
+        return strToMacAddr(mac);
 #endif
     }
     ipv4_addr_t getInterfaceIPv4Address(std::string const& interface) {
@@ -55,7 +55,7 @@ namespace pktbuilder {
         }
         auto addr = std::bit_cast<struct sockaddr_in>(req.ifr_ifru.ifru_addr);
         std::string addr_str(inet_ntoa(addr.sin_addr));
-        return str_to_ipv4_addr(addr_str);
+        return strToIpv4Addr(addr_str);
 #endif
     }
 }

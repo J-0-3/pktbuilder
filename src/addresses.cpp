@@ -5,7 +5,7 @@
 #include <iomanip>
 
 namespace pktbuilder {
-    ipv4_addr_t str_to_ipv4_addr(std::string const& ip_addr) {
+    ipv4_addr_t strToIpv4Addr(std::string const& ip_addr) {
         size_t prev_pos = -1;
         ipv4_addr_t addr = { 0, 0, 0, 0 };
         for (auto i = 0; i < 4; i++) {
@@ -37,7 +37,7 @@ namespace pktbuilder {
         return addr;
     }
 
-    std::string ipv4_addr_to_str(ipv4_addr_t const& ip_addr) {
+    std::string ipv4AddrToStr(ipv4_addr_t const& ip_addr) {
         std::stringstream str;
         str << (int)ip_addr[0] << "."
             << (int)ip_addr[1] << "."
@@ -46,7 +46,7 @@ namespace pktbuilder {
         return str.str();
     }
 
-    uint32_t ipv4_addr_to_int(ipv4_addr_t const& ip_addr) {
+    uint32_t ipv4AddrToInt(ipv4_addr_t const& ip_addr) {
         return (
                 static_cast<uint32_t>(ip_addr[0]) << 24 |
                 static_cast<uint32_t>(ip_addr[1]) << 16 |
@@ -55,7 +55,7 @@ namespace pktbuilder {
         );
     }
 
-    ipv4_addr_t int_to_ipv4_addr(uint32_t ip_addr) {
+    ipv4_addr_t intToIpv4Addr(uint32_t ip_addr) {
         return ipv4_addr_t({
             static_cast<uint8_t>((ip_addr & 0xff000000) >> 24),
             static_cast<uint8_t>((ip_addr & 0x00ff0000) >> 16),
@@ -64,7 +64,7 @@ namespace pktbuilder {
         });
     }
 
-    mac_addr_t str_to_mac_addr(std::string const& mac_addr) {
+    mac_addr_t strToMacAddr(std::string const& mac_addr) {
         mac_addr_t addr = { 0, 0, 0, 0, 0, 0 };
         size_t prev_pos = -1;
         for (auto i = 0; i < 6; i++) {
@@ -93,7 +93,7 @@ namespace pktbuilder {
         return addr;
     }
 
-    std::string mac_addr_to_str(mac_addr_t const& mac_addr) {
+    std::string macAddrToStr(mac_addr_t const& mac_addr) {
         std::stringstream str;
         str << std::setfill('0') << std::setw(2) << std::right << std::hex
             << (int)mac_addr[0];

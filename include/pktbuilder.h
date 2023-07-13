@@ -5,3 +5,4 @@
 #include <pktbuilder/ICMP.h>
 #include <pktbuilder/TCP.h>
 #include <pktbuilder/UDP.h>
+#include <pktbuilder/DNS.h>
