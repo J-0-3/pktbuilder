@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+include(CTest)
+link_libraries(pktbuilder)
+add_executable(formatDomainName formatDomainName.cpp)
+add_test(NAME formatDomainName COMMAND formatDomainName)
