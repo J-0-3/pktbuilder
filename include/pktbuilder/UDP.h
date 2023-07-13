@@ -14,7 +14,7 @@ namespace pktbuilder {
         UDPDatagram() = default;
         explicit UDPDatagram(uint32_t destination_port, uint32_t source_port = 0, bool no_checksum = false);
         UDPDatagram(ipv4_addr_t destination_address, uint32_t destination_port, ipv4_addr_t source_address, uint32_t source_port = 0);
-        IPv4Packet operator|(IPv4Packet const& other);
+        IPv4::Packet operator|(IPv4::Packet const& other);
         [[nodiscard]] std::vector<uint8_t> build() const override;
     };
 }

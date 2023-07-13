@@ -21,11 +21,11 @@ namespace pktbuilder {
         this->no_checksum = false;
     }
 
-    IPv4Packet UDPDatagram::operator|(const IPv4Packet &other) {
+    IPv4::Packet UDPDatagram::operator|(const IPv4::Packet &other) {
         this->source_address = other.getSourceAddress();
         this->destination_address = other.getDestinationAddress();
-        IPv4Packet new_packet = other;
-        new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4ProtocolNumber::UDP);
+        IPv4::Packet new_packet = other;
+        new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4::ProtocolNumber::UDP);
         new_packet.setPayload(this->build());
         return new_packet;
     }
@@ -53,7 +53,7 @@ namespace pktbuilder {
             to_checksum.insert(to_checksum.end(), this->source_address.begin(), this->source_address.end());
             to_checksum.insert(to_checksum.end(), this->destination_address.begin(), this->destination_address.end());
             to_checksum.push_back(0);
-            to_checksum.push_back(static_cast<uint8_t>(IPv4ProtocolNumber::UDP));
+            to_checksum.push_back(static_cast<uint8_t>(IPv4::ProtocolNumber::UDP));
             to_checksum.insert(to_checksum.end(), udp_length_bytes.begin(), udp_length_bytes.end());
             to_checksum.insert(to_checksum.end(), data.begin(), data.end());
             to_checksum.insert(to_checksum.end(), this->payload.begin(), this->payload.end());

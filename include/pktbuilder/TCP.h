@@ -49,7 +49,7 @@ namespace pktbuilder {
                   uint16_t window_size, std::vector<TCPOption> const& options,
                   ipv4_addr_t source_address = { 0, 0, 0, 0 },
                   uint32_t ack_number = 0, uint16_t urgent_pointer = 0);
-        IPv4Packet operator|(const IPv4Packet& other);
+        IPv4::Packet operator|(const IPv4::Packet& other);
         [[nodiscard]] std::vector<uint8_t> build() const override;
     };
 }

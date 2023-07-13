@@ -50,11 +50,11 @@ namespace pktbuilder {
         this->urgent_pointer = urgent_pointer;
     }
 
-    IPv4Packet TCPPacket::operator| (const IPv4Packet& other) {
+    IPv4::Packet TCPPacket::operator| (const IPv4::Packet& other) {
         this->source_address = other.getSourceAddress();
         this->destination_address = other.getDestinationAddress();
-        IPv4Packet new_packet = other;
-        new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4ProtocolNumber::TCP);
+        IPv4::Packet new_packet = other;
+        new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4::ProtocolNumber::TCP);
         new_packet.setPayload(this->build());
         return new_packet;
     }
@@ -104,7 +104,7 @@ namespace pktbuilder {
         pseudo_header.insert(pseudo_header.end(), this->source_address.begin(), this->source_address.end());
         pseudo_header.insert(pseudo_header.end(), this->destination_address.begin(), this->destination_address.end());
         pseudo_header.push_back(0);
-        pseudo_header.push_back(static_cast<uint8_t>(IPv4ProtocolNumber::TCP));
+        pseudo_header.push_back(static_cast<uint8_t>(IPv4::ProtocolNumber::TCP));
         if (data.size() > UINT16_MAX) {
             throw(std::runtime_error("TCP Packet too large for pseudoheader"));
         }
