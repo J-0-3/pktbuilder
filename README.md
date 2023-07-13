@@ -61,7 +61,7 @@ cd pktbuilder
 ```
 Configure CMake with:
 ```
-cmake -B build -DCMAKE_BUILD_TYPE=Release .
+cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF .
 ```
 Build PKTBuilder with:
 ```
