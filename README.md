@@ -122,9 +122,9 @@ protocols at the top and the lower level protocols at the bottom like so:
 
 ```c++
 auto packet = std::string("hello world") |
-              pktbuilder::UDPDatagram(8080) |
-              pktbuilder::IPv4Packet({192, 168, 1, 1}) |
-              pktbuilder::EthernetFrame({0x01, 0x23, 0x45, 0x67, 0x89, 0xab});
+              pktbuilder::UDP::Datagram(8080) |
+              pktbuilder::IPv4::Packet({192, 168, 1, 1}) |
+              pktbuilder::Ethernet::Frame({0x01, 0x23, 0x45, 0x67, 0x89, 0xab});
 ```
 
 In this example, it can be seen that the "application" data (the string 
@@ -167,8 +167,8 @@ If you were not using such low level protocols, you could also use a BSD
 socket, for example:
 ```c++
 auto packet = std::array<uint8_t, 4>({0xab, 0xff, 0xde, 0x1}) |
-              pktbuilder::TCPPacket(80, {192, 168, 1, 1}, 200, 4000000000,
-                  pktbuilder::TCPFlag::PSH | pktbuilder::TCPFlag::RST, 1024, {});
+              pktbuilder::TCP::Packet(80, {192, 168, 1, 1}, 200, 4000000000,
+                  pktbuilder::TCP::Flag::PSH | pktbuilder::TCP::Flag::RST, 1024, {});
 
 std::vector<uint8_t> data = packet.build();
 
@@ -198,10 +198,10 @@ Want an AppleTalk ethertype Ethernet frame contained in an ICMP echo request in
 a UDP datagram?
 ```c++
 auto packet = pktbuilder::EthernetFrame({0xab, 0xcd, 0xef, 0x12, 0x34, 0x56},
-                                        pktbuilder::EtherType::AppleTalk,
+                                        pktbuilder::Ethernet::EtherType::AppleTalk,
                                         {0xde, 0xad, 0xbe, 0xef, 0, 0}) |
-                                        pktbuilder::ICMPPacket(8, 0, {0, 0, 0, 0}) |
-                                        pktbuilder::UDPDatagram(1024, 800);
+                                        pktbuilder::ICMP::Packet(8, 0, {0, 0, 0, 0}) |
+                                        pktbuilder::UDP::Datagram(1024, 800);
 ```
 
 This flexibility allows any part of the network stack to be switched out for 
