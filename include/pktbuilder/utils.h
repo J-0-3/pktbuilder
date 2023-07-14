@@ -17,7 +17,7 @@ namespace pktbuilder {
         }
         return bytes;
     }
-    std::string getDefaultInterfaceName();
-    mac_addr_t getInterfaceMAC(std::string const& interface);
-    ipv4_addr_t getInterfaceIPv4Address(std::string const& interface);
+
+    mac_addr_t getDefaultInterfaceMAC();
+    ipv4_addr_t getDefaultInterfaceIPv4Address();
 }

@@ -66,3 +66,4 @@ CTestTestfile.cmake
 _deps
 build/**
 .vscode/
+.vs/

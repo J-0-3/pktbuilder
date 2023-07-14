@@ -13,12 +13,7 @@ namespace pktbuilder {
         Packet::Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
                             uint8_t protocol) {
             if (source_ip == ipv4_addr_t({0, 0, 0, 0})) {
-                std::string default_nic = getDefaultInterfaceName();
-                if (!default_nic.empty()) {
-                    this->source_ip = getInterfaceIPv4Address(default_nic);
-                } else {
-                    this->source_ip = source_ip;
-                }
+                this->source_ip = getDefaultInterfaceIPv4Address();
             } else {
                 this->source_ip = source_ip;
             }
@@ -28,7 +23,7 @@ namespace pktbuilder {
             this->ecn = ECNCodePoint::NOT_ECT;
             this->ttl = 64;
             std::mt19937 mt{std::random_device{}()};
-            std::uniform_int_distribution ident_vals{0, UINT16_MAX};
+            std::uniform_int_distribution<uint16_t> ident_vals{0, UINT16_MAX};
             this->identification = ident_vals(mt);
             this->dont_fragment = true;
             this->more_fragments = false;
@@ -140,7 +135,10 @@ namespace pktbuilder {
         }
 
         Ethernet::Frame Packet::operator| (const Ethernet::Frame& other) const {
-            uint16_t ethertype = other.getEthertype() ?: Ethernet::EtherType::IPv4;
+            uint16_t ethertype = other.getEthertype();
+            if (!ethertype) {
+                ethertype = Ethernet::EtherType::IPv4;
+            }
             Ethernet::Frame new_frame(other.getDestinationMac(), ethertype, other.getSourceMac());
             new_frame.setPayload(this->build());
             return new_frame;

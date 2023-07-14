@@ -32,12 +32,7 @@ namespace pktbuilder {
                             ipv4_addr_t source_address, uint32_t ack_number,
                             uint16_t urgent_pointer) {
             if (source_address == ipv4_addr_t({0, 0, 0, 0})) {
-                std::string if_name = getDefaultInterfaceName();
-                if (!if_name.empty()) {
-                    this->source_address = getInterfaceIPv4Address(if_name);
-                } else {
-                    this->source_address = source_address;
-                }
+                this->source_address = getDefaultInterfaceIPv4Address();
             } else {
                 this->source_address = source_address;
             }
@@ -56,7 +51,11 @@ namespace pktbuilder {
             this->source_address = other.getSourceAddress();
             this->destination_address = other.getDestinationAddress();
             IPv4::Packet new_packet = other;
-            new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4::ProtocolNumber::TCP);
+            if (other.getProtocolNumber()) {
+                new_packet.setProtocolNumber(other.getProtocolNumber());
+            } else {
+                new_packet.setProtocolNumber(IPv4::ProtocolNumber::TCP);
+            }
             new_packet.setPayload(this->build());
             return new_packet;
         }
