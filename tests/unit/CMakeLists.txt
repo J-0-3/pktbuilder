@@ -21,5 +21,3 @@ add_test(NAME macAddrToStr COMMAND macAddrToStr)
 
 add_executable(strToMacAddr strToMacAddr.cpp)
 add_test(NAME strToMacAddr COMMAND strToMacAddr)
-
-add_executable(getDefaultInterfaceName getDefaultInterfaceName.cpp)
