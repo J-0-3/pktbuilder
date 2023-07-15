@@ -5,6 +5,7 @@
 #include <iostream>
 #ifdef WIN32
 #include <Windows.h>
+#include <iphlpapi.h>
 #else
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -35,7 +36,58 @@ namespace pktbuilder {
 
     mac_addr_t getDefaultInterfaceMAC() {
 #ifdef WIN32
-        return { 0, 0, 0, 0, 0, 0 };
+        ipv4_addr_t default_routing_interface = getDefaultInterfaceIPv4Address();
+        if (default_routing_interface == ipv4_addr_t({ 0, 0, 0, 0 })) {
+            return { 0, 0, 0, 0, 0, 0 };
+        }
+        std::string default_ip = ipv4AddrToStr(default_routing_interface);
+        PIP_ADAPTER_INFO adapter_list = reinterpret_cast<PIP_ADAPTER_INFO>(malloc(sizeof(IP_ADAPTER_INFO)));
+        if (adapter_list == nullptr) {
+            return { 0, 0, 0, 0, 0, 0 };
+        }
+        ZeroMemory(adapter_list, sizeof(IP_ADAPTER_INFO));
+        ULONG required_size = 0;
+        if (GetAdaptersInfo(adapter_list, &required_size) != ERROR_SUCCESS) {
+            free(adapter_list);
+            adapter_list = reinterpret_cast<PIP_ADAPTER_INFO>(malloc(required_size));
+            if (adapter_list == nullptr) {
+                return { 0, 0, 0, 0, 0, 0 };
+            }
+            ZeroMemory(adapter_list, required_size);
+            if (GetAdaptersInfo(adapter_list, &required_size) != ERROR_SUCCESS) {
+                free(adapter_list);
+                return { 0, 0, 0, 0, 0, 0 };
+            }
+        }
+        PIP_ADAPTER_INFO cur_adapter = adapter_list;
+        PIP_ADAPTER_INFO default_adapter = nullptr;
+        while (cur_adapter) {
+            PIP_ADDR_STRING cur_ip = &(cur_adapter->IpAddressList);
+            while (cur_ip) {
+                if (std::string(cur_ip->IpAddress.String) == default_ip) {
+                    default_adapter = cur_adapter;
+                    break;
+                }
+                cur_ip = cur_ip->Next;
+            }
+            if (default_adapter) {
+                break;
+            }
+            cur_adapter = cur_adapter->Next;
+        }
+        if (!default_adapter) {
+            free(adapter_list);
+            return { 0, 0, 0, 0, 0, 0 };
+        }
+        if (default_adapter->AddressLength != 6) {
+            free(adapter_list);
+            return { 0, 0, 0, 0, 0, 0 };
+        }
+        mac_addr_t default_mac({ 0, 0, 0, 0 ,0 ,0 });
+        std::memcpy(default_mac.data(), default_adapter->Address, 6);
+        free(adapter_list);
+        return default_mac;
+
 #else
         std::string inter = getDefaultInterfaceName();
         std::ifstream fstream("/sys/class/net/" + inter + "/address");
@@ -46,6 +98,7 @@ namespace pktbuilder {
     }
     ipv4_addr_t getDefaultInterfaceIPv4Address() {
 #ifdef WIN32
+        // Why is Windows like this?
         std::string cmd = "C:\\Windows\\System32\\route.exe print 0.0.0.0 -4";
         HANDLE stdout_p_read = NULL;
         HANDLE stdout_p_write = NULL;
@@ -66,10 +119,19 @@ namespace pktbuilder {
         startup_info.hStdError = stdout_p_write;
         startup_info.dwFlags |= STARTF_USESTDHANDLES;
         PROCESS_INFORMATION pInfo = { 0 };
-        CreateProcess(NULL, cmd.data(), NULL, NULL, true, 0, NULL, NULL, &startup_info, &pInfo);
-        char buf[4096];
+        if (!CreateProcess(NULL, cmd.data(), NULL, NULL, true, 0, NULL, NULL, &startup_info, &pInfo)) {
+            CloseHandle(pInfo.hProcess);
+            CloseHandle(pInfo.hThread);
+            return { 0, 0, 0, 0 };
+        }
+        CloseHandle(pInfo.hProcess);
+        CloseHandle(pInfo.hThread);
+        char buf[4097];
+        ZeroMemory(&buf, 4097);
         DWORD n_read = 0;
-        BOOL success = ReadFile(stdout_p_read, buf, 4096, &n_read, NULL);
+        if (!ReadFile(stdout_p_read, buf, 4096, &n_read, NULL) || n_read == 0) {
+            return { 0, 0, 0, 0 };
+        }
         std::string cmd_output(buf);
         size_t dest_begin = cmd_output.find("0.0.0.0");
         size_t dest_end = cmd_output.find(' ', dest_begin + 1);
