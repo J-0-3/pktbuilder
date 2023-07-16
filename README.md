@@ -63,11 +63,15 @@ I have tested the following IDEs, and confirmed that they should
 automatically detect the build configuration: 
 
 - Visual Studio 2022
-- JetBrain CLion
-- Visual Studio Code (with the CMake Tools extension)
+- JetBrain CLion (make sure to delete CLion's automatically created `Debug` 
+or `Release` build profile and select the `windows-release` or `linux-release` profile instead)
+
+Visual Studio Code with the CMake Tools extension works on Linux but not on Windows.
 ---
 
 #### Building with the Command Line
+
+If you are on Windows, make sure these commands are run from the `Developer Command Prompt for VS`.
 
 Move into the `pktbuilder` directory with:
 ```
