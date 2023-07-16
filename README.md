@@ -35,7 +35,6 @@ Protcols which will be implemented in the future include:
 - AX.25
 
 Further features I aim to add include:
-- Windows support
 - Packet decoding
 - Sending packets at various layers
 - Utility functions for certain protocols (such as performing the TCP 3-way handshake)
@@ -62,11 +61,14 @@ I have tested the following IDEs, and confirmed that they should
 automatically detect the build configuration: 
 
 - Visual Studio 2022
-- JetBrain CLion (make sure to delete CLion's automatically created `Debug` 
-or `Release` build profile and select the `windows-release` or `linux-release` profile instead,
-otherwise CLion will build it twice)
+- JetBrains CLion*
+- Visual Studio Code with CMake Tools (**Linux only**).
 
-Visual Studio Code with the CMake Tools extension works on Linux but not on Windows.
+\*In order to use JetBrains CLion, it is recommended that you follow these steps:
+- Delete the automatically created `Debug` or `Release` profile, and select instead the `windows-release` or `linux-release` profile
+(otherwise CLion will build it twice).
+- Set your default toolchain (`Settings -> Build, Execution, Deployment -> Toolchains`) to `Visual Studio` instead of `MinGW`.
+
 ---
 
 #### Building with the Command Line
@@ -81,13 +83,13 @@ Configure CMake with:
 
 Windows:
 ```
-cmake --preset windows-release .
+cmake --preset windows-release
 ```
 
 Linux:
 
 ```
-cmake --preset linux-release .
+cmake --preset linux-release
 ```
 
 
