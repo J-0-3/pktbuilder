@@ -5,6 +5,7 @@
 #else
 #include <memory>
 #include <unistd.h>
+#include <fstream>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
