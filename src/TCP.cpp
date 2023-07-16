@@ -32,12 +32,7 @@ namespace pktbuilder {
                             ipv4_addr_t source_address, uint32_t ack_number,
                             uint16_t urgent_pointer) {
             if (source_address == ipv4_addr_t({0, 0, 0, 0})) {
-                std::string if_name = getDefaultInterfaceName();
-                if (!if_name.empty()) {
-                    this->source_address = getInterfaceIPv4Address(if_name);
-                } else {
-                    this->source_address = source_address;
-                }
+                this->source_address = getDefaultInterfaceIPv4Address();
             } else {
                 this->source_address = source_address;
             }
@@ -56,7 +51,11 @@ namespace pktbuilder {
             this->source_address = other.getSourceAddress();
             this->destination_address = other.getDestinationAddress();
             IPv4::Packet new_packet = other;
-            new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4::ProtocolNumber::TCP);
+            if (other.getProtocolNumber()) {
+                new_packet.setProtocolNumber(other.getProtocolNumber());
+            } else {
+                new_packet.setProtocolNumber(IPv4::ProtocolNumber::TCP);
+            }
             new_packet.setPayload(this->build());
             return new_packet;
         }
@@ -80,11 +79,11 @@ namespace pktbuilder {
                 padding_bytes = static_cast<uint8_t>(std::ceil(header_size / 4.) * 4 - header_size);
             }
             header_size += padding_bytes;
-            uint8_t data_offset = header_size / 4;
+            const uint8_t data_offset = header_size / 4;
             if (data_offset != (data_offset & 0xffff)) {
                 throw(std::runtime_error("TCP Header too long"));
             }
-            data.push_back(data_offset << 4);
+            data.push_back(data_offset << 4u);
             data.push_back(this->flags);
             std::array<uint8_t, 2> window_size_bytes = splitBytesBigEndian(this->window_size);
             data.insert(data.end(), window_size_bytes.begin(), window_size_bytes.end());
@@ -110,15 +109,15 @@ namespace pktbuilder {
             if (data.size() > UINT16_MAX) {
                 throw(std::runtime_error("TCP Packet too large for pseudoheader"));
             }
-            auto tcp_length = static_cast<uint16_t>(data.size());
+            const auto tcp_length = static_cast<uint16_t>(data.size());
             std::array<uint8_t, 2> length_bytes = splitBytesBigEndian(tcp_length);
             pseudo_header.insert(pseudo_header.end(), length_bytes.begin(), length_bytes.end());
             std::vector<uint8_t> to_checksum;
             to_checksum.reserve(data.size() + pseudo_header.size());
             to_checksum.insert(to_checksum.end(), pseudo_header.begin(), pseudo_header.end());
             to_checksum.insert(to_checksum.end(), data.begin(), data.end());
-            uint16_t checksum = calculateInternetChecksum(to_checksum);
-            std::array<uint8_t, 2> checksum_bytes = splitBytesBigEndian(checksum);
+            const uint16_t checksum = calculateInternetChecksum(to_checksum);
+            const std::array<uint8_t, 2> checksum_bytes = splitBytesBigEndian(checksum);
             data.at(16) = checksum_bytes[0];
             data.at(17) = checksum_bytes[1];
             return data;

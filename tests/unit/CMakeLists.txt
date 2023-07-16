@@ -21,3 +21,9 @@ add_test(NAME macAddrToStr COMMAND macAddrToStr)
 
 add_executable(strToMacAddr strToMacAddr.cpp)
 add_test(NAME strToMacAddr COMMAND strToMacAddr)
+
+add_executable(getDefaultInterfaceIPv4Address getDefaultInterfaceIPv4Address.cpp)
+add_test(NAME getDefaultInterfaceIPv4Address COMMAND getDefaultInterfaceIPv4Address)
+
+add_executable(getDefaultInterfaceMAC getDefaultInterfaceMAC.cpp)
+add_test(NAME getDefaultInterfaceMAC COMMAND getDefaultInterfaceMAC)

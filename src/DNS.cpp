@@ -44,7 +44,7 @@ namespace pktbuilder {
 
         std::vector<uint8_t> Message::build() const {
             std::vector<uint8_t> data;
-            std::array<uint8_t, 2> id_b = splitBytesBigEndian(this->id);
+            const std::array<uint8_t, 2> id_b = splitBytesBigEndian(this->id);
             data.push_back(id_b[0]);
             data.push_back(id_b[1]);
             if (this->opcode > 15) {
@@ -53,48 +53,48 @@ namespace pktbuilder {
             if (this->flags > 15) {
                 throw(std::runtime_error("Flags too large"));
             }
-            data.push_back(static_cast<uint8_t>(this->qr) << 7 | this->opcode << 3
-                | this->flags >> 1);
-            if (this->rcode > 15) {
+            data.push_back(static_cast<uint8_t>(this->qr) << 7u | this->opcode << 3u
+                | this->flags >> 1u);
+            if (this->rcode > 15u) {
                 throw(std::runtime_error("RCode too large"));
             }
             data.push_back((this->flags & 1) << 7 | this->rcode);
             if (this->questions.size() > UINT16_MAX) {
                 throw(std::runtime_error("Too many question sections"));
             }
-            std::array<uint8_t, 2> qd_c_b = splitBytesBigEndian(
+            const std::array<uint8_t, 2> qd_c_b = splitBytesBigEndian(
                 static_cast<uint16_t>(this->questions.size()));
             data.push_back(qd_c_b[0]);
             data.push_back(qd_c_b[1]);
             if (this->answers.size() > UINT16_MAX) {
                 throw(std::runtime_error("Too many answer sections"));
             }
-            std::array<uint8_t, 2> an_c_b = splitBytesBigEndian(
+            const std::array<uint8_t, 2> an_c_b = splitBytesBigEndian(
                 static_cast<uint16_t>(this->answers.size()));
             data.push_back(an_c_b[0]);
             data.push_back(an_c_b[1]);
             if (this->authorities.size() > UINT16_MAX) {
                 throw(std::runtime_error("Too many nameserver sections"));
             }
-            std::array<uint8_t, 2> ns_c_b = splitBytesBigEndian(
+            const std::array<uint8_t, 2> ns_c_b = splitBytesBigEndian(
                 static_cast<uint16_t>(this->authorities.size()));
             data.push_back(ns_c_b[0]);
             data.push_back(ns_c_b[1]);
             if (this->additional.size() > UINT16_MAX) {
                 throw(std::runtime_error("Too many additional sections"));
             }
-            std::array<uint8_t, 2> ar_c_b = splitBytesBigEndian(
+            const std::array<uint8_t, 2> ar_c_b = splitBytesBigEndian(
                 static_cast<uint16_t>(this->additional.size()));
             data.push_back(ar_c_b[0]);
             data.push_back(ar_c_b[1]);
             
             for(Question const& q: this->questions) {
-                std::vector<uint8_t> qname = formatDomainName(q.domain_name);
+                const std::vector<uint8_t> qname = formatDomainName(q.domain_name);
                 data.insert(data.end(), qname.begin(), qname.end());
-                std::array<uint8_t, 2> qtype_b = splitBytesBigEndian(q.qtype);
+                const std::array<uint8_t, 2> qtype_b = splitBytesBigEndian(q.qtype);
                 data.push_back(qtype_b[0]);
                 data.push_back(qtype_b[1]);
-                std::array<uint8_t, 2> qclass_b = splitBytesBigEndian(q.qclass);
+                const std::array<uint8_t, 2> qclass_b = splitBytesBigEndian(q.qclass);
                 data.push_back(qclass_b[0]);
                 data.push_back(qclass_b[1]);
             }
@@ -119,11 +119,11 @@ namespace pktbuilder {
             size_t prev = -1;
             bool done = false;
             while (!done) {
-                if (period_pos == domain_name.npos) {
+                if (period_pos == std::string::npos) {
                     period_pos = domain_name.length();
                     done = true;
                 }
-                size_t section_length = period_pos - prev - 1;
+                const size_t section_length = period_pos - prev - 1;
                 if (section_length > UINT8_MAX) {
                     throw(std::runtime_error("Domain name too long"));
                 }

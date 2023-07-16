@@ -2,7 +2,7 @@
 #include <cassert>
 
 using namespace pktbuilder;
-int main(void) {
+int main() {
     ipv4_addr_t addr({192, 168, 1, 2});
     assert(ipv4AddrToStr(addr) == "192.168.1.2");
     

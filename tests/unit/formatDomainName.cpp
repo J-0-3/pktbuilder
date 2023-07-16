@@ -1,7 +1,7 @@
 #include <pktbuilder/DNS.h>
 #include <cassert>
 
-int main(void) {
+int main() {
     std::string domain_name = "host.somedomain.co.uk";
     std::vector<uint8_t> formatted = pktbuilder::DNS::formatDomainName(domain_name);
     assert(formatted == std::vector<uint8_t>(

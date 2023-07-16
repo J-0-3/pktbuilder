@@ -2,7 +2,7 @@
 #include <cassert>
 
 using namespace pktbuilder;
-int main(void) {
+int main() {
     ipv4_addr_t addr({0xaa, 0xbd, 0x56, 0x32});
     assert(ipv4AddrToInt(addr) == 0xaabd5632);
 

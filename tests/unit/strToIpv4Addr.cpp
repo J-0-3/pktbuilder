@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 using namespace pktbuilder;
-int main(void) {
+int main() {
     std::string addr_str = "172.16.0.3";
     assert(strToIpv4Addr(addr_str) == ipv4_addr_t({172, 16, 0, 3}));
 
@@ -15,31 +15,24 @@ int main(void) {
     
     try {
         strToIpv4Addr("invalid");
-        exit(EXIT_FAILURE);
+        return 1;
     } catch(const std::invalid_argument& e) {
         assert(std::string(e.what()) == "not a valid IPv4 address");
-    } catch(const std::exception& e) {
-        exit(EXIT_FAILURE);
     }
 
     try {
         strToIpv4Addr("10.10.10.");
-        exit(EXIT_FAILURE);
+        return 1;
     } catch(const std::invalid_argument& e) {
         assert(std::string(e.what()) == "not a valid IPv4 address");
-    } catch (const std::exception& e) {
-        exit(EXIT_FAILURE);
     }
 
     try {
         strToIpv4Addr("256.300.10.323");
-        exit(EXIT_FAILURE);
-    } catch (const std::invalid_argument& e) {
-        assert(std::string(e.what()) == "not a valid IPv4 address");
-    } catch (const std::exception& e) {
-        exit(EXIT_FAILURE);
+        return 1;
     }
-
-
+    catch (const std::invalid_argument& e) {
+        assert(std::string(e.what()) == "not a valid IPv4 address");
+    }
     return 0;
 }

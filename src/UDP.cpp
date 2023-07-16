@@ -5,7 +5,7 @@
 
 namespace pktbuilder {
     namespace UDP {
-        Datagram::Datagram(uint32_t destination_port, uint32_t source_port, bool no_checksum) {
+        Datagram::Datagram(uint16_t destination_port, uint16_t source_port, bool no_checksum) {
             this->source_port = source_port;
             this->destination_port = destination_port;
             this->source_address = { 0, 0, 0, 0 };
@@ -13,8 +13,8 @@ namespace pktbuilder {
             this->no_checksum = no_checksum;
         }
         Datagram::Datagram(ipv4_addr_t destination_address,
-                    uint32_t destination_port, ipv4_addr_t source_address,
-                    uint32_t source_port) {
+                    uint16_t destination_port, ipv4_addr_t source_address,
+                    uint16_t source_port) {
             this->source_port = source_port;
             this->source_address = source_address;
             this->destination_port = destination_port;
@@ -26,7 +26,11 @@ namespace pktbuilder {
             this->source_address = other.getSourceAddress();
             this->destination_address = other.getDestinationAddress();
             IPv4::Packet new_packet = other;
-            new_packet.setProtocolNumber(other.getProtocolNumber() ?: IPv4::ProtocolNumber::UDP);
+            if (other.getProtocolNumber()) {
+                new_packet.setProtocolNumber(other.getProtocolNumber());
+            } else {
+                new_packet.setProtocolNumber(IPv4::ProtocolNumber::UDP);
+            }
             new_packet.setPayload(this->build());
             return new_packet;
         }
@@ -41,7 +45,7 @@ namespace pktbuilder {
             if (this->payload.size() + 8 > UINT16_MAX) {
                 throw(std::runtime_error("UDP Datagram too large"));
             }
-            uint16_t udp_length = static_cast<uint8_t>(this->payload.size()) + 8;
+            const uint16_t udp_length = static_cast<uint8_t>(this->payload.size()) + 8;
             std::array<uint8_t, 2> udp_length_bytes = splitBytesBigEndian(udp_length);
             data.insert(data.end(), udp_length_bytes.begin(), udp_length_bytes.end());
             if (this->no_checksum) {
@@ -58,7 +62,7 @@ namespace pktbuilder {
                 to_checksum.insert(to_checksum.end(), udp_length_bytes.begin(), udp_length_bytes.end());
                 to_checksum.insert(to_checksum.end(), data.begin(), data.end());
                 to_checksum.insert(to_checksum.end(), this->payload.begin(), this->payload.end());
-                uint16_t checksum = calculateInternetChecksum(to_checksum);
+                const uint16_t checksum = calculateInternetChecksum(to_checksum);
                 std::array<uint8_t, 2> checksum_bytes = splitBytesBigEndian(checksum);
                 data.insert(data.end(), checksum_bytes.begin(), checksum_bytes.end());
             }

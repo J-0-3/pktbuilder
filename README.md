@@ -12,8 +12,7 @@ values from the higher level protocols contained within them. For example,
 an IPv4 packet will automatically set its protocol number to the correct value
 when a Layer 4 protocol is added on top. 
 
-PKTBuilder currently only supports Linux, but Windows support will be added 
-very soon.
+PKTBuilder supports both Linux and Windows.
 
 ## Currently Implemented Protocols
 
@@ -36,7 +35,6 @@ Protcols which will be implemented in the future include:
 - AX.25
 
 Further features I aim to add include:
-- Windows support
 - Packet decoding
 - Sending packets at various layers
 - Utility functions for certain protocols (such as performing the TCP 3-way handshake)
@@ -44,38 +42,80 @@ Further features I aim to add include:
 ## Installation
 
 While precompiled static binaries are available, it is recommended that you 
-compile PKTBuilder from source using CMake. PKTBuilder has no dependencies,
-but requires a compiler with support for C++20 (you can check which compilers
-are supported [here](https://en.cppreference.com/w/cpp/compiler_support/20)).
+compile PKTBuilder from source using CMake. PKTBuilder requires a compiler 
+with support for C++20 (you can check which compilers are supported 
+[here](https://en.cppreference.com/w/cpp/compiler_support/20)).
 
 To build PKTBuilder you will also need CMake 3.22 or greater.
 ### Compiling PKTBuilder
 
-To compile PKTBuilder, clone the repository with:
+To compile PKTBuilder, first clone the repository with:
 ```
 git clone https://github.com/joedthomas2005/pktbuilder
 ```
-Then move into the `pktbuilder` directory with:
+
+PKTBuilder can be built using either the command line (recommended)
+or various IDEs.
+
+I have tested the following IDEs, and confirmed that they should 
+automatically detect the build configuration: 
+
+- Visual Studio 2022
+- JetBrains CLion*
+- Visual Studio Code with CMake Tools (**Linux only**).
+
+\*In order to use JetBrains CLion, it is recommended that you follow these steps:
+- Delete the automatically created `Debug` or `Release` profile, and select instead the `windows-release` or `linux-release` profile
+(otherwise CLion will build it twice).
+- Set your default toolchain (`Settings -> Build, Execution, Deployment -> Toolchains`) to `Visual Studio` instead of `MinGW`.
+
+---
+
+#### Building with the Command Line
+
+If you are on Windows, make sure these commands are run from the `Developer Command Prompt for VS`.
+
+Move into the `pktbuilder` directory with:
 ```
 cd pktbuilder
 ```
 Configure CMake with:
+
+Windows:
 ```
-cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF .
+cmake --preset windows-release
 ```
+
+Linux:
+
+```
+cmake --preset linux-release
+```
+
+
 Build PKTBuilder with:
+
+Windows:
 ```
-cmake --build build
+cmake --build --preset windows-release
 ```
-Inside the `build` directory will be a file called `libpktbuilder.a`
-(or `libpktbuilder.so` if it was built as a shared library). 
+
+Linux:
+```
+cmake --build --preset linux-release
+```
+
+Inside the `build/linux-release` or `build/windows-release` folder
+the compiled library will be called `libpktbuilder.a`/`libpktbuilder.so`
+if you are using Linux or `pktbuilder.lib`/`pktbuilder.dll` if you are 
+using Windows.
 
 ### Linking to PKTBuilder
 
 To use PKTBuilder in your program, first this library file must be placed in a 
 directory where your compiler can link to it. This could either be in the system-wide
 default library path (usually `/usr/lib` on Linux) or a local directory for your
-program. 
+program (recommended). 
 
 If the library is not placed in your default system library path, you must add 
 the directory containing it to your compiler's library path. If you are using
@@ -104,7 +144,10 @@ your compile command), If your project is using CMake then add a line to your
 `CMakeLists.txt` which adds the directory to your include path (
 `include_directories(<PATH TO HEADERS> <OTHER INCLUDE DIRECTORIES...>)`).
 
-In order to build a project using PKTBuilder you **must** enable C++20 support. To do this with g++, add `-std=c++20` to your compile command. If you are using CMake this can be done by adding the following line to your `CMakeLists.txt`: 
+In order to build a project using PKTBuilder you **must** enable C\+\+20 support.
+To do this with g\+\+, add `-std=c++20` to your compile command. If you 
+are using CMake this can be done by adding the following line to your 
+`CMakeLists.txt`: 
 ```
 set(CMAKE_CXX_STANDARD 20)
 ```
