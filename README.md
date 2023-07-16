@@ -12,8 +12,7 @@ values from the higher level protocols contained within them. For example,
 an IPv4 packet will automatically set its protocol number to the correct value
 when a Layer 4 protocol is added on top. 
 
-PKTBuilder currently only supports Linux, but Windows support will be added 
-very soon.
+PKTBuilder supports both Linux and Windows.
 
 ## Currently Implemented Protocols
 
