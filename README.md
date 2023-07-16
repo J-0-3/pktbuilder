@@ -56,7 +56,7 @@ To compile PKTBuilder, first clone the repository with:
 git clone https://github.com/joedthomas2005/pktbuilder
 ```
 
-PKTBuilder can be build using either the command line (recommended)
+PKTBuilder can be built using either the command line (recommended)
 or various IDEs.
 
 I have tested the following IDEs, and confirmed that they should 
@@ -64,7 +64,8 @@ automatically detect the build configuration:
 
 - Visual Studio 2022
 - JetBrain CLion (make sure to delete CLion's automatically created `Debug` 
-or `Release` build profile and select the `windows-release` or `linux-release` profile instead)
+or `Release` build profile and select the `windows-release` or `linux-release` profile instead,
+otherwise CLion will build it twice)
 
 Visual Studio Code with the CMake Tools extension works on Linux but not on Windows.
 ---
