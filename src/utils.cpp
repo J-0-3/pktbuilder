@@ -1,9 +1,10 @@
 #include <pktbuilder/utils.h>
-#include <iostream>
 #ifdef WIN32
 #include <Windows.h>
 #include <iphlpapi.h>
 #else
+#include <memory>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <net/if.h>
@@ -30,7 +31,6 @@ namespace {
 }
 #endif
 namespace pktbuilder {
-
     mac_addr_t getDefaultInterfaceMAC() {
 #ifdef WIN32
         const ipv4_addr_t default_routing_interface = getDefaultInterfaceIPv4Address();
