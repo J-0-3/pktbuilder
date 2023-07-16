@@ -27,3 +27,6 @@ add_test(NAME getDefaultInterfaceIPv4Address COMMAND getDefaultInterfaceIPv4Addr
 
 add_executable(getDefaultInterfaceMAC getDefaultInterfaceMAC.cpp)
 add_test(NAME getDefaultInterfaceMAC COMMAND getDefaultInterfaceMAC)
+
+add_executable(calculateInternetChecksum calculateInternetChecksum.cpp)
+add_test(NAME calculateInternetChecksum COMMAND calculateInternetChecksum)
