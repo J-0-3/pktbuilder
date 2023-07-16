@@ -17,7 +17,7 @@ namespace pktbuilder {
                     throw std::invalid_argument("not a valid IPv4 address");
                 }
             }
-            size_t octet_char_length = period_pos - prev_pos - 1;
+            const size_t octet_char_length = period_pos - prev_pos - 1;
             std::string octet = ip_addr.substr(prev_pos + 1, octet_char_length);
             if (octet.length() < 1 || octet.length() > 3) {
                 throw std::invalid_argument("not a valid IPv4 address");
@@ -39,10 +39,10 @@ namespace pktbuilder {
 
     std::string ipv4AddrToStr(ipv4_addr_t const& ip_addr) {
         std::stringstream str;
-        str << (int)ip_addr[0] << "."
-            << (int)ip_addr[1] << "."
-            << (int)ip_addr[2] << "."
-            << (int)ip_addr[3];
+        str << static_cast<unsigned int>(ip_addr[0]) << "."
+            << static_cast<unsigned int>(ip_addr[1]) << "."
+            << static_cast<unsigned int>(ip_addr[2]) << "."
+            << static_cast<unsigned int>(ip_addr[3]);
         return str.str();
     }
 
@@ -76,7 +76,7 @@ namespace pktbuilder {
                     throw std::invalid_argument("not a valid MAC address");
                 }
             }
-            size_t octet_char_length = colon_pos - prev_pos - 1;
+            const size_t octet_char_length = colon_pos - prev_pos - 1;
             std::string octet = mac_addr.substr(prev_pos + 1, octet_char_length);
             if (octet.length() != 2) {
                 throw std::invalid_argument("not a valid MAC address");
@@ -96,12 +96,12 @@ namespace pktbuilder {
     std::string macAddrToStr(mac_addr_t const& mac_addr) {
         std::stringstream str;
         str << std::setfill('0') << std::setw(2) << std::right << std::hex
-            << (int)mac_addr[0];
+            << static_cast<unsigned int>(mac_addr[0]);
 
         for(auto i = 1; i < 6; i++) {
             str << ":";
             str << std::setfill('0') << std::setw(2) << std::right << std::hex
-                << (int)mac_addr[i];
+                << static_cast<unsigned int>(mac_addr[i]);
         }
         return str.str();
     }

@@ -1,7 +1,5 @@
 #include <pktbuilder/Ethernet.h>
 #include <pktbuilder/utils.h>
-#include <bit>
-#include <cstring>
 
 namespace pktbuilder {
     namespace Ethernet {

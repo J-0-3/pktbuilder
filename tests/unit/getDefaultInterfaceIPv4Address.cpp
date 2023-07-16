@@ -1,9 +1,9 @@
 #include <pktbuilder/utils.h>
-#include <iostream>
+#include <cassert>
 
 using namespace pktbuilder;
 int main() {
 	const ipv4_addr_t default_ip = getDefaultInterfaceIPv4Address();
-	const std::string ip_str = ipv4AddrToStr(default_ip);
-	std::cout << ip_str << std::endl;
+	assert(default_ip != ipv4_addr_t({ 0, 0, 0, 0 }));
+	assert(default_ip[0] != 127); // not loopback
 }

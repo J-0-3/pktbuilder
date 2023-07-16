@@ -2,7 +2,7 @@
 #include <cassert>
 
 using namespace pktbuilder;
-int main(void) {
+int main() {
     uint32_t addr_int = 0xffbbae20;
     assert(intToIpv4Addr(addr_int) == ipv4_addr_t({0xff, 0xbb, 0xae, 0x20}));
 

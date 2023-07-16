@@ -2,7 +2,7 @@
 #include <cassert>
 
 using namespace pktbuilder;
-int main(void) {
+int main() {
     mac_addr_t mac{0xab, 0xcd, 0xef, 0x12, 0x34, 0x56};
     assert(macAddrToStr(mac) == "ab:cd:ef:12:34:56");
     

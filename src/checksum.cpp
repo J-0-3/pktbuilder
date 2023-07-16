@@ -7,16 +7,16 @@ namespace pktbuilder {
             header.push_back(0);
         }
         std::vector<uint16_t> header_words;
-        for (int i = 0; i < header.size() - 1; i+=2) {
-            uint16_t word = static_cast<uint16_t>(header.at(i)) << 8 |
+        for (size_t i = 0; i < header.size() - 1; i+=2) {
+            uint16_t word = static_cast<uint16_t>(header.at(i) << 8) |
                             static_cast<uint16_t>(header.at(i + 1));
             header_words.push_back(word);
         }
-        for (uint16_t word: header_words) {
+        for (uint16_t const& word: header_words) {
             sum += word;
         }
         sum = (sum >> 16) + (sum & 0xffff);
         sum += sum >> 16;
-        return ~sum;
+        return static_cast<uint16_t>(~sum);
     }
 }

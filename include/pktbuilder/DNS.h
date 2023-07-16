@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <pktbuilder/Layer.h>
 
@@ -155,7 +156,6 @@ namespace pktbuilder {
                 std::vector<ResourceRecord> const& authorities, 
                 std::vector<ResourceRecord> const& additional);
             [[nodiscard]] std::vector<uint8_t> build() const override;
-    
         };
         }
 };

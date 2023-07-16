@@ -1,7 +1,4 @@
 #include <pktbuilder/utils.h>
-#include <cstdio>
-#include <fstream>
-#include <memory>
 #include <iostream>
 #ifdef WIN32
 #include <Windows.h>
@@ -36,12 +33,12 @@ namespace pktbuilder {
 
     mac_addr_t getDefaultInterfaceMAC() {
 #ifdef WIN32
-        ipv4_addr_t default_routing_interface = getDefaultInterfaceIPv4Address();
+        const ipv4_addr_t default_routing_interface = getDefaultInterfaceIPv4Address();
         if (default_routing_interface == ipv4_addr_t({ 0, 0, 0, 0 })) {
             return { 0, 0, 0, 0, 0, 0 };
         }
-        std::string default_ip = ipv4AddrToStr(default_routing_interface);
-        PIP_ADAPTER_INFO adapter_list = reinterpret_cast<PIP_ADAPTER_INFO>(malloc(sizeof(IP_ADAPTER_INFO)));
+        const std::string default_ip = ipv4AddrToStr(default_routing_interface);
+        auto adapter_list = static_cast<PIP_ADAPTER_INFO>(malloc(sizeof(IP_ADAPTER_INFO)));
         if (adapter_list == nullptr) {
             return { 0, 0, 0, 0, 0, 0 };
         }
@@ -49,7 +46,7 @@ namespace pktbuilder {
         ULONG required_size = 0;
         if (GetAdaptersInfo(adapter_list, &required_size) != ERROR_SUCCESS) {
             free(adapter_list);
-            adapter_list = reinterpret_cast<PIP_ADAPTER_INFO>(malloc(required_size));
+            adapter_list = static_cast<PIP_ADAPTER_INFO>(malloc(required_size));
             if (adapter_list == nullptr) {
                 return { 0, 0, 0, 0, 0, 0 };
             }
@@ -99,27 +96,30 @@ namespace pktbuilder {
     ipv4_addr_t getDefaultInterfaceIPv4Address() {
 #ifdef WIN32
         // Why is Windows like this?
-        std::string cmd = "C:\\Windows\\System32\\route.exe print 0.0.0.0 -4";
-        HANDLE stdout_p_read = NULL;
-        HANDLE stdout_p_write = NULL;
-        HANDLE stdin_p_read = NULL;
-        HANDLE stdin_p_write = NULL;
-        SECURITY_ATTRIBUTES sec_attrib = { 0 };
+        std::string cmd = R"(C:\Windows\System32\route.exe print 0.0.0.0 -4)";
+        HANDLE stdout_p_read = nullptr;
+        HANDLE stdout_p_write = nullptr;
+        HANDLE stdin_p_read = nullptr;
+        HANDLE stdin_p_write = nullptr;
+        SECURITY_ATTRIBUTES sec_attrib;
         sec_attrib.bInheritHandle = true;
         sec_attrib.nLength = sizeof(SECURITY_ATTRIBUTES);
-        sec_attrib.lpSecurityDescriptor = NULL;
+        sec_attrib.lpSecurityDescriptor = nullptr;
         CreatePipe(&stdout_p_read, &stdout_p_write, &sec_attrib, 0);
         SetHandleInformation(stdout_p_read, HANDLE_FLAG_INHERIT, 0);
         CreatePipe(&stdin_p_read, &stdin_p_write, &sec_attrib, 0);
         SetHandleInformation(stdin_p_write, HANDLE_FLAG_INHERIT, 0);
-        STARTUPINFO startup_info = { 0 };
+        STARTUPINFO startup_info = {};
         startup_info.cb = sizeof(STARTUPINFO);
         startup_info.hStdOutput = stdout_p_write;
         startup_info.hStdInput = stdin_p_read;
         startup_info.hStdError = stdout_p_write;
         startup_info.dwFlags |= STARTF_USESTDHANDLES;
-        PROCESS_INFORMATION pInfo = { 0 };
-        if (!CreateProcess(NULL, cmd.data(), NULL, NULL, true, 0, NULL, NULL, &startup_info, &pInfo)) {
+        PROCESS_INFORMATION pInfo = {};
+        if (!CreateProcess(nullptr, cmd.data(), 
+            nullptr, nullptr, true, 
+            0, nullptr, nullptr, 
+            &startup_info, &pInfo)) {
             CloseHandle(pInfo.hProcess);
             CloseHandle(pInfo.hThread);
             return { 0, 0, 0, 0 };
@@ -129,19 +129,19 @@ namespace pktbuilder {
         char buf[4097];
         ZeroMemory(&buf, 4097);
         DWORD n_read = 0;
-        if (!ReadFile(stdout_p_read, buf, 4096, &n_read, NULL) || n_read == 0) {
+        if (!ReadFile(stdout_p_read, buf, 4096, &n_read, nullptr) || n_read == 0) {
             return { 0, 0, 0, 0 };
         }
         std::string cmd_output(buf);
-        size_t dest_begin = cmd_output.find("0.0.0.0");
-        size_t dest_end = cmd_output.find(' ', dest_begin + 1);
-        size_t netmask_begin = cmd_output.find("0.0.0.0", dest_end + 1);
-        size_t netmask_end = cmd_output.find(' ', netmask_begin + 1);
-        size_t gateway_begin = cmd_output.find_first_not_of(' ', netmask_end + 1);
-        size_t gateway_end = cmd_output.find(' ', gateway_begin + 1);
-        size_t interface_begin = cmd_output.find_first_not_of(' ', gateway_end + 1);
-        size_t interface_end = cmd_output.find(' ', interface_begin);
-        std::string if_ip_str = cmd_output.substr(interface_begin, interface_end - interface_begin);
+        const size_t dest_begin = cmd_output.find("0.0.0.0");
+        const size_t dest_end = cmd_output.find(' ', dest_begin + 1);
+        const size_t netmask_begin = cmd_output.find("0.0.0.0", dest_end + 1);
+        const size_t netmask_end = cmd_output.find(' ', netmask_begin + 1);
+        const size_t gateway_begin = cmd_output.find_first_not_of(' ', netmask_end + 1);
+        const size_t gateway_end = cmd_output.find(' ', gateway_begin + 1);
+        const size_t interface_begin = cmd_output.find_first_not_of(' ', gateway_end + 1);
+        const size_t interface_end = cmd_output.find(' ', interface_begin);
+        const std::string if_ip_str = cmd_output.substr(interface_begin, interface_end - interface_begin);
         return strToIpv4Addr(if_ip_str);
 #else
         std::string inter = getDefaultInterfaceName();
