@@ -10,7 +10,7 @@
       "name": "windows-debug",
       "displayName": "Windows Debug",
       "description": "Default debug for Windows",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/windows-debug",
       "generator": "Ninja",
       "cacheVariables": {
         "BUILD_TESTING": "on",
@@ -26,7 +26,7 @@
       "name": "windows-release",
       "displayName": "Windows Release",
       "description": "Default release for Windows",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/windows-release",
       "generator": "Ninja",
       "cacheVariables": {
         "BUILD_TESTING": "off",
@@ -42,7 +42,7 @@
       "name": "linux-debug",
       "displayName": "Linux Debug",
       "description": "Default debug for Linux",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/linux-debug",
       "cacheVariables": {
         "BUILD_TESTING": "on",
         "CMAKE_BUILD_TYPE": "Debug"
@@ -57,7 +57,7 @@
       "name": "linux-release",
       "displayName": "Linux Release",
       "description": "Default release for Linux",
-      "binaryDir": "${sourceDir}/build/${presetName}",
+      "binaryDir": "${sourceDir}/build/linux-release",
       "cacheVariables": {
         "BUILD_TESTING": "off",
         "CMAKE_BUILD_TYPE": "Release"
