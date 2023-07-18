@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+target_link_libraries(pktbuilder)
+add_executable(ping ping.cpp)
+add_executable(timestamp timestamp.cpp)
+add_executable(timestampReply timestampReply.cpp)
