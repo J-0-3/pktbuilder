@@ -34,6 +34,16 @@ namespace pktbuilder {
             data.at(3) = checksum_bytes[1];
             return data;
         }
+        IPv4::Packet Packet::operator|(IPv4::Packet const& other) {
+            uint16_t proto_num = other.getProtocolNumber();
+            if (!proto_num) {
+                proto_num = IPv4::ProtocolNumber::ICMP;
+            }
+            IPv4::Packet packet = other;
+            packet.setProtocolNumber(proto_num);
+            packet.setPayload(this->build());
+            return packet;
+        }
         std::array<uint8_t, 12> createTimestampMessage(uint32_t originate_timestamp) {
             std::array<uint8_t, 12> data{};
             std::array<uint8_t, 4> ts_bytes = splitBytesBigEndian(originate_timestamp);

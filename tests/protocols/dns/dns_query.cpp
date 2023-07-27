@@ -12,7 +12,7 @@ int main() {
     connect(s, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
     auto message = pktbuilder::DNS::Message(1, pktbuilder::DNS::MessageType::QUERY, 
         pktbuilder::DNS::Opcode::QUERY, pktbuilder::DNS::Flag::RD, 0, 
-        { 
+        {
             pktbuilder::DNS::Question{
                 .domain_name = "google.com",
                 .qtype = pktbuilder::DNS::Type::A,

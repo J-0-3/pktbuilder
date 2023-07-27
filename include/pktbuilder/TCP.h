@@ -41,14 +41,17 @@ namespace pktbuilder {
             std::vector<Option> options;
         public:
             Packet() = default;
-            Packet(uint16_t source_port, uint16_t destination_port,
-                    uint32_t sequence_number, uint8_t flags,
-                    uint16_t window_size, std::vector<Option> const& options,
+            Packet(uint16_t destination_port, uint16_t source_port,
+                    uint8_t flags, uint16_t window_size = UINT16_MAX, 
+                    uint32_t sequence_number = 0, 
+                    std::vector<Option> const& options = {},
                     uint32_t ack_number = 0, uint16_t urgent_pointer = 0);
-            Packet(uint16_t destination_port, ipv4_addr_t destination_address,
-                    uint16_t source_port, uint32_t sequence_number, uint8_t flags,
-                    uint16_t window_size, std::vector<Option> const& options,
+            Packet(uint16_t destination_port, ipv4_addr_t destination_address, 
+                    uint16_t source_port, uint8_t flags,  
                     ipv4_addr_t source_address = { 0, 0, 0, 0 },
+                    uint16_t window_size = UINT16_MAX, 
+                    uint32_t sequence_number = 0, 
+                    std::vector<Option> const& options = {},
                     uint32_t ack_number = 0, uint16_t urgent_pointer = 0);
             IPv4::Packet operator|(const IPv4::Packet& other);
             [[nodiscard]] std::vector<uint8_t> build() const override;

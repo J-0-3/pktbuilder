@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.22)
 add_subdirectory(unit)
 add_subdirectory(manual)
 if (NOT WIN32)

@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.22)
 include(CTest)
 link_libraries(pktbuilder)
 add_executable(formatDomainName formatDomainName.cpp)
@@ -30,3 +29,7 @@ add_test(NAME getDefaultInterfaceMAC COMMAND getDefaultInterfaceMAC)
 
 add_executable(calculateInternetChecksum calculateInternetChecksum.cpp)
 add_test(NAME calculateInternetChecksum COMMAND calculateInternetChecksum)
+
+add_executable(combineBytesBigEndian combineBytesBigEndian.cpp)
+add_test(NAME combineBytesBigEndian COMMAND combineBytesBigEndian)
+add_subdirectory(decoding)

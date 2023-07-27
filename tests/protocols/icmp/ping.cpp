@@ -12,7 +12,6 @@ int main() {
     auto message = std::array<uint8_t, 4>{0xde, 0xad, 0xbe, 0xef} | 
                     pktbuilder::ICMP::Packet(pktbuilder::ICMP::Type::ECHO_REQUEST, 
                         pktbuilder::ICMP::Code::EchoRequest::ECHO_REQUEST, {0, 0, 0, 0});
-    
     std::vector<uint8_t> data = message.build();
-    send(s, data.data(), data.size(), 0);
+    send(s, data.data(), data.size(), 0); 
 }

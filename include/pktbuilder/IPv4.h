@@ -164,6 +164,36 @@ namespace pktbuilder {
             CONGESTION_EXPERIENCED = 3
         };
 
+        namespace OptionType {
+            enum OptionType: uint8_t {
+                EOOL = 0,
+                NOP = 1,
+                SEC = 2,
+                RR = 7,
+                ZSU = 10,
+                MTUP = 11,
+                MTUR = 12,
+                ENCODE = 15,
+                QS = 25,
+                TS = 68,
+                TR = 82,
+                SEC_RIPSO = 130,
+                LSR = 131,
+                ESEC = 133,
+                CIPSO = 134,
+                SID = 136,
+                SSR = 137,
+                VISA = 142,
+                IMITD = 144,
+                EIP = 145,
+                ADDEXT = 147,
+                RTRALT = 148,
+                SDB = 149,
+                DPS = 151,
+                UMP = 152,
+                FINN = 205
+            };
+        }
         typedef struct Option{
             uint8_t option_type;
             std::vector<uint8_t> option_value;
@@ -184,8 +214,8 @@ namespace pktbuilder {
         public:
             Packet() = default;
             explicit Packet(ipv4_addr_t destination_ip,
-                                ipv4_addr_t source_ip = { 0, 0, 0, 0 },
-                                uint8_t protocol = 0);
+                                uint8_t protocol = 0,
+                                ipv4_addr_t source_ip = { 0, 0, 0, 0 });
             Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
                     uint8_t protocol, uint16_t identification,
                     uint8_t, ECNCodePoint ecn,

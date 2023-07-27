@@ -7,8 +7,7 @@
 
 namespace pktbuilder {
     namespace IPv4 {
-        Packet::Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
-                            uint8_t protocol) {
+        Packet::Packet(ipv4_addr_t destination_ip, uint8_t protocol, ipv4_addr_t source_ip) {
             if (source_ip == ipv4_addr_t({0, 0, 0, 0})) {
                 this->source_ip = getDefaultInterfaceIPv4Address();
             } else {
