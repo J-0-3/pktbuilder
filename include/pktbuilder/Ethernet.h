@@ -73,6 +73,8 @@ namespace pktbuilder {
                 uint16_t ethertype = 0,
                 mac_addr_t const& source_mac = {0, 0, 0, 0, 0, 0});
             [[nodiscard]] std::vector<uint8_t> build() const override;
+            [[nodiscard]] static Frame decodeFrom(std::vector<uint8_t> const& data);
+            [[nodiscard]] static Frame decodeFrom(const uint8_t* data, size_t len);
             [[nodiscard]] const mac_addr_t& getDestinationMac() const;
             [[nodiscard]] const mac_addr_t& getSourceMac() const;
             [[nodiscard]] const uint16_t& getEthertype() const;

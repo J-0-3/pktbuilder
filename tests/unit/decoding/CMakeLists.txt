@@ -1,0 +1,2 @@
+add_executable(decodeEthernetFrame ethernetFrame.cpp)
+add_test(decodeEthernetFrame decodeEthernetFrame)

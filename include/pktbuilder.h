@@ -6,3 +6,4 @@
 #include <pktbuilder/TCP.h>
 #include <pktbuilder/UDP.h>
 #include <pktbuilder/DNS.h>
+#include <pktbuilder/utils.h>

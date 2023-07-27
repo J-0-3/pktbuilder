@@ -1,5 +1,6 @@
 #include <pktbuilder/Ethernet.h>
 #include <pktbuilder/utils.h>
+#include <stdexcept>
 
 namespace pktbuilder {
     namespace Ethernet {
@@ -25,6 +26,22 @@ namespace pktbuilder {
             data.insert(data.end(), this->payload.begin(),
                         this->payload.end());
             return data;
+        }
+        Frame Frame::decodeFrom(const uint8_t* data, size_t len) {
+            if (len < 14) {
+                throw(std::invalid_argument("Ethernet frame too small"));
+            }
+            Frame frame;
+            std::memcpy(frame.destination_mac.data(), data, 6);
+            std::memcpy(frame.source_mac.data(), data + 6, 6);
+            frame.ethertype = combineBytesBigEndian(data[12], data[13]);
+            if (len > 14) {
+                frame.payload.insert(frame.payload.end(), data + 14, data + len);
+            }
+            return frame;
+        }
+        Frame Frame::decodeFrom(std::vector<uint8_t> const& data) {
+            return Frame::decodeFrom(data.data(), data.size());
         }
         const mac_addr_t& Frame::getDestinationMac() const {
             return this->destination_mac;

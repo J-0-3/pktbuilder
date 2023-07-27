@@ -17,7 +17,7 @@ namespace pktbuilder {
         }
         return bytes;
     }
-
+    uint16_t combineBytesBigEndian(uint8_t b1, uint8_t b2);
     mac_addr_t getDefaultInterfaceMAC();
     ipv4_addr_t getDefaultInterfaceIPv4Address();
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pktbuilder/Layer.h>
+#include <pktbuilder/IPv4.h>
 #include <array>
 
 namespace pktbuilder {
@@ -227,6 +228,7 @@ namespace pktbuilder {
             Packet(uint8_t type, uint8_t code, 
                     uint16_t identifier, uint16_t sequence_number);
             [[nodiscard]] std::vector<uint8_t> build() const override;
+            IPv4::Packet operator|(IPv4::Packet const& other);
         };
     }
 }

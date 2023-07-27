@@ -32,6 +32,17 @@ namespace {
 }
 #endif
 namespace pktbuilder {
+    uint16_t combineBytesBigEndian(uint8_t b1, uint8_t b2) {
+        uint16_t combined;
+        if (std::endian::native == std::endian::big) {
+            std::memcpy(&combined, &b1, 1);
+            std::memcpy(reinterpret_cast<uint8_t*>(&combined) + 1, &b2, 1);
+        } else {
+            std::memcpy(&combined, &b2, 1);
+            std::memcpy(reinterpret_cast<uint8_t*>(&combined) + 1, &b1, 1);
+        }
+        return combined;
+    }
     mac_addr_t getDefaultInterfaceMAC() {
 #ifdef WIN32
         const ipv4_addr_t default_routing_interface = getDefaultInterfaceIPv4Address();

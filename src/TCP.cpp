@@ -3,18 +3,24 @@
 #include <pktbuilder/utils.h>
 #include <cmath>
 #include <stdexcept>
+#include <random>
 
 namespace pktbuilder {
     namespace TCP {
-
-        Packet::Packet(uint16_t source_port, uint16_t destination_port,
-                            uint32_t sequence_number,
-                            uint8_t flags, uint16_t window_size,
-                            const std::vector<Option> &options,
-                            uint32_t ack_number, uint16_t urgent_pointer) {
+        Packet::Packet(uint16_t destination_port, uint16_t source_port,
+                    uint8_t flags, uint16_t window_size, 
+                    uint32_t sequence_number, 
+                    std::vector<Option> const& options,
+                    uint32_t ack_number, uint16_t urgent_pointer) {
             this->source_port = source_port;
             this->destination_port = destination_port;
-            this->sequence_number = sequence_number;
+            if (sequence_number > 0) {
+                this->sequence_number = sequence_number;
+            } else {
+                std::mt19937 mt(std::random_device{}());
+                std::uniform_int_distribution<uint32_t> seq_n_range(0);
+                this->sequence_number = seq_n_range(mt);
+            }
             this->ack_number = ack_number;
             this->flags = flags;
             this->window_size = window_size;
@@ -24,13 +30,12 @@ namespace pktbuilder {
             this->destination_address = { 0, 0, 0, 0 };
         }
 
-        Packet::Packet(uint16_t destination_port,
-                            ipv4_addr_t destination_address, uint16_t source_port,
-                            uint32_t sequence_number, uint8_t flags,
-                            uint16_t window_size,
-                            const std::vector<Option> &options,
-                            ipv4_addr_t source_address, uint32_t ack_number,
-                            uint16_t urgent_pointer) {
+        Packet::Packet(uint16_t destination_port, ipv4_addr_t destination_address, 
+                    uint16_t source_port, uint8_t flags, ipv4_addr_t source_address,
+                    uint16_t window_size, uint32_t sequence_number, 
+                    std::vector<Option> const& options,
+                    uint32_t ack_number, uint16_t urgent_pointer) {
+
             if (source_address == ipv4_addr_t({0, 0, 0, 0})) {
                 this->source_address = getDefaultInterfaceIPv4Address();
             } else {
@@ -39,7 +44,13 @@ namespace pktbuilder {
             this->source_port = source_port;
             this->destination_address = destination_address;
             this->destination_port = destination_port;
-            this->sequence_number = sequence_number;
+            if (sequence_number > 0) {
+                this->sequence_number = sequence_number;
+            } else {
+                std::mt19937 mt(std::random_device{}());
+                std::uniform_int_distribution<uint32_t> seq_n_range(0);
+                this->sequence_number = seq_n_range(mt);
+            }
             this->ack_number = ack_number;
             this->flags = flags;
             this->window_size = window_size;

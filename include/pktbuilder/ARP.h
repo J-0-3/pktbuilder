@@ -4,6 +4,7 @@
 #include <cstring>
 #include <pktbuilder/Layer.h>
 #include <pktbuilder/addresses.h>
+#include <pktbuilder/Ethernet.h>
 
 namespace pktbuilder {
     namespace ARP {
@@ -114,6 +115,16 @@ namespace pktbuilder {
                 );
                 return data;
             }
+            Ethernet::Frame operator|(Ethernet::Frame const& other) {
+                uint16_t ethertype = other.getEthertype();
+                if (!ethertype) {
+                    ethertype = Ethernet::EtherType::ARP;
+                }
+                Ethernet::Frame frame(other.getDestinationMac(), ethertype, 
+                    other.getSourceMac());
+                frame.setPayload(this->build());
+                return frame;
+            }
         };
         template<uint8_t hlen, uint8_t plen>
         class Request: public Packet<hlen, plen> {
@@ -147,7 +158,7 @@ namespace pktbuilder {
                                             sender_protocol_address,
                                             target_hardware_address,
                                             target_protocol_address,
-                                            hardware_type, protocol_type, 1) {};
+                                            hardware_type, protocol_type, 2) {};
         };
         template<uint8_t plen>
         class EthernetRequest: public Request<6, plen> {
