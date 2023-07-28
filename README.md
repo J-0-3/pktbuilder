@@ -265,8 +265,47 @@ auto packet = pktbuilder::EthernetFrame({0xab, 0xcd, 0xef, 0x12, 0x34, 0x56},
 
 This flexibility allows any part of the network stack to be switched out for 
 any other without affecting the higher layers. 
-DNS over UDP and DNS over TCP are only 1 line of code different (Disclaimer: 
-DNS is not currently implemented, but I'm working on it).
+DNS over UDP and DNS over TCP are only 1 line of code different:
+
+ ```c++
+auto dns = pktbuilder::DNS::Message(
+                1, 
+                pktbuilder::DNS::MessageType::QUERY, 
+                pktbuilder::DNS::Opcode::QUERY, 
+                pktbuilder::DNS::Flag::RD,
+                0, 
+                {
+                    pktbuilder::DNS::Question{
+                        .domain_name = "google.com",
+                        .qtype = pktbuilder::DNS::Type::A,
+                        .qclass = pktbuilder::DNS::Class::IN 
+                    },
+                }, 
+                {},
+                {}, 
+                {}) | 
+            pktbuilder::UDP::Datagram(53);
+```
+
+```c++
+auto dns = pktbuilder::DNS::Message(
+                1, 
+                pktbuilder::DNS::MessageType::QUERY, 
+                pktbuilder::DNS::Opcode::QUERY, 
+                pktbuilder::DNS::Flag::RD,
+                0, 
+                {
+                    pktbuilder::DNS::Question{
+                        .domain_name = "google.com",
+                        .qtype = pktbuilder::DNS::Type::A,
+                        .qclass = pktbuilder::DNS::Class::IN 
+                    },
+                }, 
+                {},
+                {}, 
+                {}) | 
+            pktbuilder::TCP::Packet(53, 50000, pktbuilder::TCP::Flag::PSH)
+```
 
 ### Decoding Packets
 
