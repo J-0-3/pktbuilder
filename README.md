@@ -1,10 +1,10 @@
 # PKTBuilder
-## A simple, intuitive C++ packet crafting library.
+## A simple, intuitive C++ packet crafting/decoding library.
 
-PKTBuilder makes it easy to construct network packets at any layer of the 
-network stack using a simple, clean syntax. 
+PKTBuilder makes it easy to construct and decode network packets at any layer of
+the network stack using a simple, clean syntax.
 
-It can construct packets from an ever increasing number of network protocols, 
+It can construct and decode packets from an ever increasing number of network protocols, 
 from the application layer to the link layer. 
 
 It uses sane default values, and lower level protocols are able to infer 
@@ -19,11 +19,11 @@ PKTBuilder supports both Linux and Windows.
 PKTBuilder currently has implementations of:
 - Ethernet
 - IPv4
-- TCP
-- UDP
-- ICMP
-- ARP
-- DNS
+- TCP (no decoding yet)
+- UDP (no decoding yet)
+- ICMP (no decoding yet)
+- ARP (no decoding yet)
+- DNS (no decoding yet)
 
 ## Roadmap
 
@@ -35,7 +35,8 @@ Protcols which will be implemented in the future include:
 - AX.25
 
 Further features I aim to add include:
-- Packet decoding
+
+- Packet decoding for all protocols
 - Sending packets at various layers
 - Utility functions for certain protocols (such as performing the TCP 3-way handshake)
 
@@ -47,10 +48,12 @@ with support for C++20 (you can check which compilers are supported
 [here](https://en.cppreference.com/w/cpp/compiler_support/20)).
 
 To build PKTBuilder you will also need CMake 3.22 or greater.
+
 ### Compiling PKTBuilder
 
 To compile PKTBuilder, first clone the repository with:
-```
+
+```bash
 git clone https://github.com/joedthomas2005/pktbuilder
 ```
 
@@ -65,6 +68,7 @@ automatically detect the build configuration:
 - Visual Studio Code with CMake Tools (**Linux only**).
 
 \*In order to use JetBrains CLion, it is recommended that you follow these steps:
+
 - Delete the automatically created `Debug` or `Release` profile, and select instead the `windows-release` or `linux-release` profile
 (otherwise CLion will build it twice).
 - Set your default toolchain (`Settings -> Build, Execution, Deployment -> Toolchains`) to `Visual Studio` instead of `MinGW`.
@@ -76,31 +80,35 @@ automatically detect the build configuration:
 If you are on Windows, make sure these commands are run from the `Developer Command Prompt for VS`.
 
 Move into the `pktbuilder` directory with:
+
 ```
 cd pktbuilder
 ```
+
 Configure CMake with:
 
 Windows:
+
 ```
 cmake --preset windows-release
 ```
 
 Linux:
 
-```
+```bash
 cmake --preset linux-release
 ```
-
 
 Build PKTBuilder with:
 
 Windows:
+
 ```
 cmake --build --preset windows-release
 ```
 
 Linux:
+
 ```
 cmake --build --preset linux-release
 ```
@@ -156,6 +164,8 @@ In order to use pktbuilder in your project, simply `#include <pktbuilder.h>`.
 
 ## Getting Started
 
+### Building Packets
+
 PKTBuilder uses a simple syntax to represent network packets, in which layers of 
 protocols are separated using the `|` character in descending order (i.e. the 
 first protocol will be contained within the next).
@@ -195,19 +205,24 @@ upper level protocols (IPv4 and UDP respectively).
 PKTBuilder does not currently handle sending packets, and so to send the packet 
 you must first call the `build()` method on it to get an `std::vector` containing 
 the raw packet bytes:
+
 ```c++
 std::vector<uint8_t> data = packet.build();
 ```
+
 This can then be sent using whatever means you wish, for example, here I use the 
 `pcap` library to send the raw ethernet frame directly from the `eth0` network
 interface.
+
 ```c++
     char errbuf[PCAP_BUF_SIZE];
     pcap_t* handle = pcap_open_live("eth0", BUFSIZ, 1, 1000, errbuf);
     pcap_sendpacket(handle, data.data(), data.size());
 ```
+
 If you were not using such low level protocols, you could also use a BSD 
 socket, for example:
+
 ```c++
 auto packet = std::array<uint8_t, 4>({0xab, 0xff, 0xde, 0x1}) |
               pktbuilder::TCP::Packet(80, {192, 168, 1, 1}, 200, 4000000000,
@@ -239,6 +254,7 @@ to any other protocol in any order.
 
 Want an AppleTalk ethertype Ethernet frame contained in an ICMP echo request in
 a UDP datagram?
+
 ```c++
 auto packet = pktbuilder::EthernetFrame({0xab, 0xcd, 0xef, 0x12, 0x34, 0x56},
                                         pktbuilder::Ethernet::EtherType::AppleTalk,
@@ -249,5 +265,119 @@ auto packet = pktbuilder::EthernetFrame({0xab, 0xcd, 0xef, 0x12, 0x34, 0x56},
 
 This flexibility allows any part of the network stack to be switched out for 
 any other without affecting the higher layers. 
-DNS over UDP and DNS over TCP are only 1 line of code different (Disclaimer: 
-DNS is not currently implemented, but I'm working on it).
+DNS over UDP and DNS over TCP are only 1 line of code different:
+
+ ```c++
+auto dns = pktbuilder::DNS::Message(
+                1, 
+                pktbuilder::DNS::MessageType::QUERY, 
+                pktbuilder::DNS::Opcode::QUERY, 
+                pktbuilder::DNS::Flag::RD,
+                0, 
+                {
+                    pktbuilder::DNS::Question{
+                        .domain_name = "google.com",
+                        .qtype = pktbuilder::DNS::Type::A,
+                        .qclass = pktbuilder::DNS::Class::IN 
+                    },
+                }, 
+                {},
+                {}, 
+                {}) | 
+            pktbuilder::UDP::Datagram(53);
+```
+
+```c++
+auto dns = pktbuilder::DNS::Message(
+                1, 
+                pktbuilder::DNS::MessageType::QUERY, 
+                pktbuilder::DNS::Opcode::QUERY, 
+                pktbuilder::DNS::Flag::RD,
+                0, 
+                {
+                    pktbuilder::DNS::Question{
+                        .domain_name = "google.com",
+                        .qtype = pktbuilder::DNS::Type::A,
+                        .qclass = pktbuilder::DNS::Class::IN 
+                    },
+                }, 
+                {},
+                {}, 
+                {}) | 
+            pktbuilder::TCP::Packet(53, 50000, pktbuilder::TCP::Flag::PSH)
+```
+
+### Decoding Packets
+
+Layer classes have a static method called `decodeFrom`, which can be used to 
+construct an instance of that class from raw packet bytes. For example, this 
+unit test (from [here](tests/unit/decoding/ethernetFrame.cpp)) decodes the bytes
+of an ethernet frame which was captured in wireshark and compares the header 
+field values with those identified by wireshark:
+
+```c++
+int main() {
+    std::vector<uint8_t> frameData({
+        0xaa,0xbb,0xcc,0xdd,0xee,0xff,0xfe,0xdc,0xba,0x09,0x87,0x65,0x08,0x00,0x45,0x00,
+        0x00,0x54,0xdf,0x7e,0x40,0x00,0x40,0x01,0xf4,0x9f,0xc0,0xa8,0x01,0x59,0xd8,0x3a,
+        0xcc,0x4e,0x08,0x00,0x8d,0xaa,0x00,0x01,0x00,0x01,0xa0,0xaf,0xc2,0x64,0x00,0x00,
+        0x00,0x00,0x47,0x6c,0x01,0x00,0x00,0x00,0x00,0x00,0x10,0x11,0x12,0x13,0x14,0x15,
+        0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,0x20,0x21,0x22,0x23,0x24,0x25,
+        0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,0x30,0x31,0x32,0x33,0x34,0x35,
+        0x36,0x37
+    });
+    pktbuilder::Ethernet::Frame frame = pktbuilder::Ethernet::Frame::decodeFrom(frameData);
+    assert(frame.getDestinationMac() == pktbuilder::mac_addr_t({0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff}));
+    assert(frame.getSourceMac() == pktbuilder::mac_addr_t({0xfe,0xdc,0xba,0x09,0x87,0x65}));
+    assert(frame.getEthertype() == pktbuilder::Ethernet::EtherType::IPv4);
+    assert(frame.getPayload() == std::vector<uint8_t>({0x45,0x00,0x00,0x54,0xdf,0x7e,0x40,0x00,0x40, 
+        0x01,0xf4,0x9f,0xc0,0xa8,0x01,0x59,0xd8,0x3a,0xcc,0x4e,0x08,0x00,0x8d, 
+        0xaa,0x00,0x01,0x00,0x01,0xa0,0xaf,0xc2,0x64,0x00,0x00,0x00,0x00,0x47,
+        0x6c,0x01,0x00,0x00,0x00,0x00,0x00,0x10,0x11,0x12,0x13,0x14,0x15,0x16,
+        0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,0x20,0x21,0x22,0x23,0x24,
+        0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,0x30,0x31,0x32,
+        0x33,0x34,0x35,0x36,0x37}));
+}
+```
+
+As you can see, all the ethernet header data is parsed and stored in the 
+Frame object, with the rest of the data being stored in the payload field.
+
+The data stored in the payload field could then itself be parsed as an IPv4
+packet, as it is in this other unit test (from [here](tests/unit/decoding/ipv4Packet.cpp)):
+
+```c++
+using namespace pktbuilder::IPv4;
+int main() {
+    std::vector<uint8_t> data({
+        0x45,0x00,0x00,0x54,0xdf,0x7e,0x40,0x00,0x40,0x01,0xf4,0x9f,0xc0,0xa8,
+        0x01,0x59,0xd8,0x3a,0xcc,0x4e,0x08,0x00,0x8d,0xaa,0x00,0x01,0x00,0x01,
+        0xa0,0xaf,0xc2,0x64,0x00,0x00,0x00,0x00,0x47,0x6c,0x01,0x00,0x00,0x00,
+        0x00,0x00,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,
+        0x1c,0x1d,0x1e,0x1f,0x20,0x21,0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,
+        0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37
+    });
+    Packet packet = Packet::decodeFrom(data);
+    assert(packet.getDestinationAddress() == ipv4_addr_t({216, 58, 204, 78}));
+    assert(packet.getSourceAddress() == ipv4_addr_t({192, 168, 1, 89}));
+    assert(packet.getProtocolNumber() == ProtocolNumber::ICMP);
+    assert(packet.getTTL() == 64);
+    assert(packet.getIdentification() == 0xdf7e);
+    assert(packet.isFlagDontFragment());
+    assert(!packet.isFlagMoreFragments());
+    assert(packet.getECN() == ECNCodePoint::NOT_ECT);
+    assert(packet.getDSCP() == 0);
+    assert(packet.getFragmentOffset() == 0);
+    assert(packet.getOptions().empty());
+    assert(packet.getPayload() == std::vector<uint8_t>({
+        0x08,0x00,0x8d,0xaa,0x00,0x01,0x00,0x01,0xa0,0xaf,0xc2,0x64,0x00,0x00,
+        0x00,0x00,0x47,0x6c,0x01,0x00,0x00,0x00,0x00,0x00,0x10,0x11,0x12,0x13,
+        0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,0x20,0x21,
+        0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
+        0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37
+    }));
+```
+
+Once again, the IPv4 header is parsed and all relevant data is extracted, with
+the rest of the packet (an ICMP echo request to google.com) being placed in
+the payload field.
