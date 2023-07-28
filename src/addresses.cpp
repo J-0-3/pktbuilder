@@ -83,7 +83,7 @@ namespace pktbuilder {
             }
             uint8_t octet_val;
             try {
-                octet_val = std::stoi(octet, nullptr, 16);
+                octet_val = static_cast<uint8_t>(std::stoi(octet, nullptr, 16));
             } catch (std::invalid_argument&) {
                 throw std::invalid_argument("not a valid MAC address");
             }

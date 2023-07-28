@@ -1,0 +1,67 @@
+#include <pktbuilder.h>
+#include <cassert>
+
+using namespace pktbuilder;
+using namespace IPv4;
+int main() {
+    // real raw packet capture
+    std::vector<uint8_t> data = {0x45,0x00,0x00,0x54,0xdf,0x7e,0x40,0x00,0x40, 
+        0x01,0xf4,0x9f,0xc0,0xa8,0x01,0x59,0xd8,0x3a,0xcc,0x4e,0x08,0x00,0x8d, 
+        0xaa,0x00,0x01,0x00,0x01,0xa0,0xaf,0xc2,0x64,0x00,0x00,0x00,0x00,0x47,
+        0x6c,0x01,0x00,0x00,0x00,0x00,0x00,0x10,0x11,0x12,0x13,0x14,0x15,0x16,
+        0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,0x20,0x21,0x22,0x23,0x24,
+        0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,0x30,0x31,0x32,
+        0x33,0x34,0x35,0x36,0x37};
+    Packet packet = Packet::decodeFrom(data);
+    assert(packet.getDestinationAddress() == ipv4_addr_t({216, 58, 204, 78}));
+    assert(packet.getSourceAddress() == ipv4_addr_t({192, 168, 1, 89}));
+    assert(packet.getProtocolNumber() == ProtocolNumber::ICMP);
+    assert(packet.getTTL() == 64);
+    assert(packet.getIdentification() == 0xdf7e);
+    assert(packet.isFlagDontFragment());
+    assert(!packet.isFlagMoreFragments());
+    assert(packet.getECN() == ECNCodePoint::NOT_ECT);
+    assert(packet.getDSCP() == 0);
+    assert(packet.getFragmentOffset() == 0);
+    assert(packet.getOptions().empty());
+    assert(packet.getPayload() == std::vector<uint8_t>({
+        0x08,0x00,0x8d,0xaa,0x00,0x01,0x00,0x01,0xa0,0xaf,0xc2,0x64,0x00,0x00,
+        0x00,0x00,0x47,0x6c,0x01,0x00,0x00,0x00,0x00,0x00,0x10,0x11,0x12,0x13,
+        0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,0x20,0x21,
+        0x22,0x23,0x24,0x25,0x26,0x27,0x28,0x29,0x2a,0x2b,0x2c,0x2d,0x2e,0x2f,
+        0x30,0x31,0x32,0x33,0x34,0x35,0x36,0x37
+    }));
+    
+    // testing more complex packet
+    ipv4_addr_t src = {10, 0, 1, 2};
+    ipv4_addr_t dest = {10, 0, 0, 3};
+    uint8_t proto = ProtocolNumber::CHAOS;
+    uint16_t ident = 0xabcd;
+    uint8_t dscp = 7;
+    IPv4::ECNCodePoint ecn = ECNCodePoint::CONGESTION_EXPERIENCED;
+    bool df = false;
+    bool mf = true;
+    uint16_t frag_off = 99;
+    uint8_t ttl = 64;
+    std::vector<Option> options;
+    options.push_back({OptionType::ESEC, {1, 2, 3}});
+    options.push_back({OptionType::QS, {0xff, 0xff}});
+    options.push_back({OptionType::NOP, std::vector<uint8_t>()});
+    std::string payload("testing");
+    auto pkt = payload | 
+               Packet(dest, src, proto, ident, dscp, ecn, df, mf, frag_off, ttl, options);
+    data = pkt.build();
+    pkt = Packet::decodeFrom(data);
+    assert(pkt.getSourceAddress() == src);
+    assert(pkt.getDestinationAddress() == dest);
+    assert(pkt.getProtocolNumber() == proto);
+    assert(pkt.getIdentification() == ident);
+    assert(pkt.getDSCP() == dscp);
+    assert(pkt.getECN() == ecn);
+    assert(pkt.isFlagDontFragment() == df);
+    assert(pkt.isFlagMoreFragments() == mf);
+    assert(pkt.getFragmentOffset() == frag_off);
+    assert(pkt.getTTL() == ttl);
+    assert(pkt.getOptions() == options);
+    assert(pkt.getPayload() == std::vector<uint8_t>(payload.cbegin(), payload.cend()));
+}

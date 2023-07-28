@@ -197,6 +197,10 @@ namespace pktbuilder {
         typedef struct Option{
             uint8_t option_type;
             std::vector<uint8_t> option_value;
+            bool operator==(Option const& other) const {
+                return this->option_type == other.option_type && 
+                        this->option_value == other.option_value;   
+            }
         } Option;
 
         class Packet: public IntermediaryLayer {
@@ -218,16 +222,26 @@ namespace pktbuilder {
                                 ipv4_addr_t source_ip = { 0, 0, 0, 0 });
             Packet(ipv4_addr_t destination_ip, ipv4_addr_t source_ip,
                     uint8_t protocol, uint16_t identification,
-                    uint8_t, ECNCodePoint ecn,
+                    uint8_t dscp, ECNCodePoint ecn,
                     bool df_flag, bool mf_flag,
                     uint16_t fragment_offset, uint8_t ttl,
-                    std::vector<Option> const* options);
+                    std::vector<Option> const& options);
             
+            [[nodiscard]] static Packet decodeFrom(const uint8_t* data, size_t len, bool verify_checksum = true);
+            [[nodiscard]] static Packet decodeFrom(std::vector<uint8_t> const& data, bool verify_checksum = true);
             [[nodiscard]] std::vector<uint8_t> build() const override;
             Ethernet::Frame operator| (const Ethernet::Frame& other) const;
             [[nodiscard]] ipv4_addr_t const& getSourceAddress() const;
             [[nodiscard]] ipv4_addr_t const& getDestinationAddress() const;
-            [[nodiscard]] uint8_t const& getProtocolNumber() const;
+            [[nodiscard]] uint8_t getProtocolNumber() const;
+            [[nodiscard]] uint8_t  getTTL() const;
+            [[nodiscard]] ECNCodePoint getECN() const;
+            [[nodiscard]] uint8_t getDSCP() const;
+            [[nodiscard]] uint16_t getFragmentOffset() const;
+            [[nodiscard]] bool isFlagDontFragment() const;
+            [[nodiscard]] bool isFlagMoreFragments() const;
+            [[nodiscard]] std::vector<Option> const& getOptions() const;
+            [[nodiscard]] uint16_t getIdentification() const;
             void setProtocolNumber(uint8_t protocol);
         };
     }

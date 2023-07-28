@@ -1,2 +1,4 @@
 add_executable(decodeEthernetFrame ethernetFrame.cpp)
 add_test(decodeEthernetFrame decodeEthernetFrame)
+add_executable(decodeIpv4Packet ipv4Packet.cpp)
+add_test(decodeIpv4Packet decodeIpv4Packet)

@@ -1,10 +1,9 @@
 #pragma once
 
-#include <bit>
-#include <cstring>
 #include <pktbuilder/Layer.h>
 #include <pktbuilder/addresses.h>
 #include <pktbuilder/Ethernet.h>
+#include <pktbuilder/utils.h>
 
 namespace pktbuilder {
     namespace ARP {
@@ -47,35 +46,15 @@ namespace pktbuilder {
                 this->opcode = opcode;
             }
             [[nodiscard]] std::vector<uint8_t> build() const override {
-                bool swap_byte_order;
-                if (std::endian::native == std::endian::little) {
-                    swap_byte_order = true;
-                } else {
-                    swap_byte_order = false;
-                }
                 std::vector<uint8_t> data;
                 data.reserve(8 + 2 * (hlen + plen));
-                uint8_t hwtype_bytes[2];
-                std::memcpy(hwtype_bytes, &this->hardware_type, 2);
-                if (swap_byte_order) {
-                    std::reverse(
-                            std::begin(hwtype_bytes),
-                            std::end(hwtype_bytes)
-                    );
-                }
+                std::array<uint8_t, 2> hwtype_bytes = splitBytesBigEndian(this->hardware_type);
                 data.insert(
                         data.end(),
                         std::begin(hwtype_bytes),
                         std::end(hwtype_bytes)
                 );
-                uint8_t prototype_bytes[2];
-                std::memcpy(prototype_bytes, &this->protocol_type, 2);
-                if (swap_byte_order) {
-                    std::reverse(
-                            std::begin(prototype_bytes),
-                            std::end(prototype_bytes)
-                    );
-                }
+                std::array<uint8_t, 2> prototype_bytes = splitBytesBigEndian(this->protocol_type);
                 data.insert(
                         data.end(),
                         std::begin(prototype_bytes),
@@ -83,11 +62,7 @@ namespace pktbuilder {
                 );
                 data.push_back(hlen);
                 data.push_back(plen);
-                uint8_t opcode_bytes[2];
-                std::memcpy(opcode_bytes, &this->opcode, 2);
-                if (swap_byte_order) {
-                    std::reverse(std::begin(opcode_bytes), std::end(opcode_bytes));
-                }
+                std::array<uint8_t, 2> opcode_bytes = splitBytesBigEndian(this->opcode);
                 data.insert(
                         data.end(),
                         std::begin(opcode_bytes),
@@ -115,7 +90,7 @@ namespace pktbuilder {
                 );
                 return data;
             }
-            Ethernet::Frame operator|(Ethernet::Frame const& other) {
+            Ethernet::Frame operator|(Ethernet::Frame const& other) const {
                 uint16_t ethertype = other.getEthertype();
                 if (!ethertype) {
                     ethertype = Ethernet::EtherType::ARP;
@@ -141,7 +116,7 @@ namespace pktbuilder {
                                             sender_protocol_address,
                                             target_hardware_address,
                                             target_protocol_address,
-                                            hardware_type, protocol_type, 1) {};
+                                            hardware_type, protocol_type, 1) {}
         };
         template<uint8_t hlen, uint8_t plen>
         class Reply: public Packet<hlen, plen> {
@@ -158,7 +133,7 @@ namespace pktbuilder {
                                             sender_protocol_address,
                                             target_hardware_address,
                                             target_protocol_address,
-                                            hardware_type, protocol_type, 2) {};
+                                            hardware_type, protocol_type, 2) {}
         };
         template<uint8_t plen>
         class EthernetRequest: public Request<6, plen> {
@@ -175,7 +150,7 @@ namespace pktbuilder {
                                                     sender_protocol_address,
                                                     target_mac_address,
                                                     target_protocol_address,
-                                                    1, protocol_type) {};
+                                                    1, protocol_type) {}
         };
         template<uint8_t plen>
         class EthernetReply: public Reply<6, plen> {
@@ -192,7 +167,7 @@ namespace pktbuilder {
                                                 sender_protocol_address,
                                                 target_mac_address,
                                                 target_protocol_address,
-                                                1, protocol_type) {};
+                                                1, protocol_type) {}
         };
         template<uint8_t hlen>
         class IPv4Request: public Request<hlen, 4> {
@@ -209,7 +184,7 @@ namespace pktbuilder {
                                                 sender_ipv4_address,
                                                 target_hardware_address,
                                                 target_ipv4_address,
-                                                hardware_type, 0x0800) {};
+                                                hardware_type, 0x0800) {}
         };
         template<uint8_t hlen>
         class IPv4Reply: public Reply<hlen, 4> {
@@ -226,11 +201,11 @@ namespace pktbuilder {
                                             sender_ipv4_address,
                                             target_hardware_address,
                                             target_ipv4_address,
-                                            hardware_type, 0x0800) {};
+                                            hardware_type, 0x0800) {}
         };
         class IPv4EthernetRequest: public EthernetRequest<4> {
         public:
-            IPv4EthernetRequest(): EthernetRequest<4>() {
+            IPv4EthernetRequest() {
                 this->protocol_type = 0x0800;
             }
             IPv4EthernetRequest(ipv4_addr_t sender_ipv4_address,
@@ -241,11 +216,11 @@ namespace pktbuilder {
                                                         sender_ipv4_address,
                                                         target_mac_address,
                                                         target_ipv4_address,
-                                                        0x0800) {};
+                                                        0x0800) {}
         };
         class IPv4EthernetReply: public EthernetReply<4> {
         public:
-            IPv4EthernetReply(): EthernetReply<4>() {
+            IPv4EthernetReply() {
                 this->protocol_type = 0x0800;
             }
             IPv4EthernetReply(ipv4_addr_t sender_ipv4_address,
@@ -256,7 +231,7 @@ namespace pktbuilder {
                                                     sender_ipv4_address,
                                                     target_mac_address,
                                                     target_ipv4_address,
-                                                    0x0800) {};
+                                                    0x0800) {}
         };
     }
 }
