@@ -34,7 +34,7 @@ namespace {
 namespace pktbuilder {
     uint16_t combineBytesBigEndian(uint8_t b1, uint8_t b2) {
         uint16_t combined;
-        if (std::endian::native == std::endian::big) {
+        if constexpr (std::endian::native == std::endian::big) {
             std::memcpy(&combined, &b1, 1);
             std::memcpy(reinterpret_cast<uint8_t*>(&combined) + 1, &b2, 1);
         } else {
