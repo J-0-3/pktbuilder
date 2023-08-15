@@ -19,7 +19,7 @@ PKTBuilder supports both Linux and Windows.
 PKTBuilder currently has implementations of:
 - Ethernet
 - IPv4
-- TCP (no decoding yet)
+- TCP
 - UDP (no decoding yet)
 - ICMP (no decoding yet)
 - ARP (no decoding yet)
