@@ -1,7 +1,10 @@
+#include <cstddef>
+#include <cstdint>
 #include <pktbuilder/TCP.h>
 #include <pktbuilder/checksum.h>
 #include <pktbuilder/utils.h>
 #include <cmath>
+#include <unordered_map>
 #include <stdexcept>
 #include <random>
 
@@ -102,11 +105,13 @@ namespace pktbuilder {
             data.push_back(0);
             std::array<uint8_t, 2> urg_ptr_bytes = splitBytesBigEndian(this->urgent_pointer);
             data.insert(data.end(), urg_ptr_bytes.begin(), urg_ptr_bytes.end());
+
             for (Option const &option : this->options) {
                 data.push_back(0x01);
-                data.push_back(static_cast<uint8_t>(option.option_kind));
+                data.push_back(option.option_kind);
                 data.insert(data.end(), option.option_data.begin(), option.option_data.end());
             }
+
             for (auto i = 0; i < padding_bytes; i++) {
                 data.push_back(0);
             }
@@ -116,10 +121,11 @@ namespace pktbuilder {
             pseudo_header.insert(pseudo_header.end(), this->source_address.begin(), this->source_address.end());
             pseudo_header.insert(pseudo_header.end(), this->destination_address.begin(), this->destination_address.end());
             pseudo_header.push_back(0);
-            pseudo_header.push_back(static_cast<uint8_t>(IPv4::ProtocolNumber::TCP));
+            pseudo_header.push_back(IPv4::ProtocolNumber::TCP);
             if (data.size() > UINT16_MAX) {
                 throw(std::runtime_error("TCP Packet too large for pseudoheader"));
             }
+
             const auto tcp_length = static_cast<uint16_t>(data.size());
             std::array<uint8_t, 2> length_bytes = splitBytesBigEndian(tcp_length);
             pseudo_header.insert(pseudo_header.end(), length_bytes.begin(), length_bytes.end());
@@ -133,5 +139,91 @@ namespace pktbuilder {
             data.at(17) = checksum_bytes[1];
             return data;
         }
-    }
+
+		Packet Packet::decodeFrom(const uint8_t* data, size_t length) {
+			if (length < 20) {
+				throw std::invalid_argument("TCP header too short");
+			}
+			Packet pkt;
+			pkt.source_port = combineBytesBigEndian(data[0], data[1]);
+			pkt.destination_port = combineBytesBigEndian(data[2], data[3]);
+			pkt.sequence_number = combineBytesBigEndian(data[4], data[5], data[6], data[7]);
+			pkt.ack_number = combineBytesBigEndian(data[8], data[9], data[10], data[11]);
+			uint8_t data_offset = data[12] >> 4u;
+			uint8_t header_length = data_offset * 4;
+			if (header_length > length || header_length < 20) {
+				throw std::invalid_argument("TCP data offset invalid");
+			}
+			pkt.flags = data[13];
+			pkt.window_size = combineBytesBigEndian(data[14], data[15]);
+			// ignore checksum for now bc idk the best way to pass the pseudoheader data
+			pkt.urgent_pointer = combineBytesBigEndian(data[18], data[19]);
+			uint8_t option_start = 20;
+			while (option_start < header_length) {
+				uint8_t option_kind = data[option_start];
+				if (option_kind == OptionCode::EOL) {
+					break;
+				} else if (option_kind == OptionCode::NOP) {
+					option_start++;
+				} else {
+					if (option_start == header_length - 1) {
+						throw std::invalid_argument("TCP option length required");
+					}
+					uint8_t option_length = data[option_start + 1];
+					if (option_start + option_length > header_length) {
+						throw std::invalid_argument("TCP option length too large");
+					}
+					Option option;
+					option.option_kind = option_kind;
+					option.option_data.insert(
+						option.option_data.end(),
+						data + option_start + 2, 
+						data + option_start + option_length
+					);
+					pkt.options.push_back(option);
+					option_start += option_length;
+				}
+			}
+			if (length > header_length) {
+				pkt.payload.insert(pkt.payload.end(), data + header_length, data + length);
+			}
+			return pkt;
+		}
+		
+		Packet Packet::decodeFrom(std::vector<uint8_t> const& data) {
+			return Packet::decodeFrom(data.data(), data.size());
+		}
+
+		uint16_t Packet::getSourcePort() {
+			return this->source_port;
+		}
+
+		uint16_t Packet::getDestinationPort() {
+			return this->destination_port;
+		}
+
+		uint32_t Packet::getSequenceNumber() {
+			return this->sequence_number;
+		}
+
+		uint32_t Packet::getAckNumber() {
+			return this->ack_number;
+		}
+
+		uint8_t Packet::getFlags() {
+			return this->flags;
+		}
+
+		uint16_t Packet::getWindowSize() {
+			return this->window_size;
+		}
+
+		uint16_t Packet::getUrgentPointer() {
+			return this->urgent_pointer;
+		}
+
+		std::vector<Option> const& Packet::getOptions() {
+			return this->options;
+		}
+	}
 }

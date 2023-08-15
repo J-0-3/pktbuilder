@@ -68,3 +68,5 @@ build/**
 .vscode/
 .vs/
 Folder.DotSettings.user
+.cache/
+.cache/**

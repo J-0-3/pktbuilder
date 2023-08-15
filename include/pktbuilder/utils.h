@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <algorithm>
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -18,6 +19,7 @@ namespace pktbuilder {
         return bytes;
     }
     uint16_t combineBytesBigEndian(uint8_t b1, uint8_t b2);
+    uint32_t combineBytesBigEndian(uint8_t b1, uint8_t b2, uint8_t b3, uint8_t b4);
     mac_addr_t getDefaultInterfaceMAC();
     ipv4_addr_t getDefaultInterfaceIPv4Address();
 }
