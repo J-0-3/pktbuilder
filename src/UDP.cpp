@@ -45,7 +45,7 @@ namespace pktbuilder {
             if (this->payload.size() + 8 > UINT16_MAX) {
                 throw(std::runtime_error("UDP Datagram too large"));
             }
-            const uint16_t udp_length = static_cast<uint8_t>(this->payload.size()) + 8;
+            const uint16_t udp_length = static_cast<uint16_t>(this->payload.size() + 8);
             std::array<uint8_t, 2> udp_length_bytes = splitBytesBigEndian(udp_length);
             data.insert(data.end(), udp_length_bytes.begin(), udp_length_bytes.end());
             if (this->no_checksum) {
@@ -68,6 +68,37 @@ namespace pktbuilder {
             }
             data.insert(data.end(), this->payload.begin(), this->payload.end());
             return data;
+        }
+
+        Datagram Datagram::decodeFrom(const uint8_t* data, size_t len) {
+            if (len < 8) {
+                throw std::invalid_argument("UDP datagram too short");
+            } else if (len > UINT16_MAX) {
+                throw std::invalid_argument("UDP datagram too long");
+            }
+            Datagram datagram;
+            datagram.source_port = combineBytesBigEndian(data[0], data[1]);
+            datagram.destination_port = combineBytesBigEndian(data[2], data[3]);
+            uint16_t udp_length = combineBytesBigEndian(data[4], data[5]);
+            if (udp_length > len) {
+                throw std::invalid_argument("UDP length field too large");
+            }
+            if (udp_length > 8) {
+                datagram.payload.insert(datagram.payload.end(), data + 8, data + udp_length);
+            }
+            return datagram;
+        }
+
+        Datagram Datagram::decodeFrom(std::vector<uint8_t> const& data) {
+            return Datagram::decodeFrom(data.data(), data.size());
+        }
+
+        uint16_t Datagram::getSourcePort() const {
+            return this->source_port;
+        }
+
+        uint16_t Datagram::getDestinationPort() const {
+            return this->destination_port;
         }
     }
 }

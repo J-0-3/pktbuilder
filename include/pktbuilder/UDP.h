@@ -17,6 +17,10 @@ namespace pktbuilder {
             Datagram(ipv4_addr_t destination_address, uint16_t destination_port, ipv4_addr_t source_address, uint16_t source_port = 0);
             IPv4::Packet operator|(IPv4::Packet const& other);
             [[nodiscard]] std::vector<uint8_t> build() const override;
+            [[nodiscard]] uint16_t getSourcePort() const;
+            [[nodiscard]] uint16_t getDestinationPort() const;
+            [[nodiscard]] static Datagram decodeFrom(const uint8_t* data, size_t len);
+            [[nodiscard]] static Datagram decodeFrom(std::vector<uint8_t> const& data); 
         };
     }
 }
