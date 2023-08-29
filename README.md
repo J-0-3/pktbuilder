@@ -20,7 +20,7 @@ PKTBuilder currently has implementations of:
 - Ethernet
 - IPv4
 - TCP
-- UDP (no decoding yet)
+- UDP
 - ICMP (no decoding yet)
 - ARP (no decoding yet)
 - DNS (no decoding yet)
