@@ -212,15 +212,11 @@ namespace pktbuilder {
                 };
             }
         }
-        std::array<uint8_t, 12> createTimestampMessage();
-        std::array<uint8_t, 12> createTimestampMessage(uint32_t originate_timestamp);
-        std::array<uint8_t, 12> createTimestampReplyMessage(uint32_t originate_timestamp, 
-            uint32_t receive_timestamp, uint32_t transmit_timestamp);
-        std::array<uint8_t, 12> createTimestampReplyMessage(uint32_t originate_timestamp);
         class Packet: public IntermediaryLayer{
-            uint8_t type{};
-            uint8_t code{};
-            std::array<uint8_t, 4> header_contents{};
+            uint8_t type;
+            uint8_t code;
+            std::array<uint8_t, 4> header_contents;
+            std::vector<uint8_t> body;
         public:
             Packet() = default;
             Packet(uint8_t type, uint8_t code,
@@ -228,6 +224,12 @@ namespace pktbuilder {
             Packet(uint8_t type, uint8_t code, 
                     uint16_t identifier, uint16_t sequence_number);
             [[nodiscard]] std::vector<uint8_t> build() const override;
+            [[nodiscard]] uint8_t getType() const;
+            [[nodiscard]] uint8_t getCode() const;
+            [[nodiscard]] const std::vector<uint8_t>& getPayload() const;
+            [[nodiscard]] std::array<uint8_t, 4> getHeaderContents() const;
+            [[nodiscard]] uint16_t getSequenceNumber() const;
+            [[nodiscard]] uint16_t getIdentifier() const;
             IPv4::Packet operator|(IPv4::Packet const& other) const;
         };
     }
